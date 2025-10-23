@@ -9,7 +9,7 @@ By leveraging large language models (LLMs) to process earnings call transcripts,
 Users must first register and log in to access the platform’s analytical tools.
 (Core feature: secure user database and session management.)
 
-1 ompany & Period Selection
+1 Company & Period Selection
 After authentication, users can select specific companies (e.g., Microsoft, Amazon) and desired time ranges (e.g., Q1 2020 – Q2 2025) for analysis.
 (Core feature: interactive selection interface and query handling.)
 
