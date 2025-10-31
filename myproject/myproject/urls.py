@@ -16,9 +16,9 @@ Including another URLconf
 """
 # myproject/urls.py
 from django.contrib import admin
-from django.urls import path, include  # 别忘了导入 include
+from django.urls import path, include  
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('mailinglist.urls')), # <-- 把根URL指向我们的应用
+    path('', include('mailinglist.urls')), 
 ]
