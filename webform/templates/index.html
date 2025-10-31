@@ -12,11 +12,6 @@
     <!-- Short heading so users know what the form is for -->
     <h1>Join Our Mailing List</h1>
 
-    <!-- Show an error message from the server if something went wrong -->
-    {% if error %}
-    <p>{{ error }}</p>
-    {% endif %}
-
     <!-- Basic HTML form that sends the data back to the same route -->
     <form method="post">
       <!-- Collect the user's name; keep the previous value if validation fails -->
@@ -25,7 +20,7 @@
         <input
           type="text"
           name="username"
-          value="{{ username | default('') }}"
+          value=""
           required
         >
       </label>
@@ -36,7 +31,7 @@
         <input
           type="email"
           name="email"
-          value="{{ email | default('') }}"
+          value=""
           required
         >
       </label>
