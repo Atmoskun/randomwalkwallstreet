@@ -10,11 +10,7 @@ def index(request):
     
     # 2. Check if the user pressed the "Submit" button (POST)
     if request.method == "POST":
-        
-        # 3. Get the data from the form
-        #    (Corresponds to name="username" in index.html)
         name_from_form = request.POST.get("username")
-        #    (Corresponds to name="email" in index.html)
         email_from_form = request.POST.get("email")
         
         # 4. Validate (Even though HTML has 'required', checking again is safer)
