@@ -3,6 +3,23 @@
 <head>
     <meta charset="utf-8">
     <title>Welcome!</title>
+    <style>
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f0f;
+            position: absolute;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
 </head>
 <body>
     <h2>Input your information</h2>
@@ -24,5 +41,31 @@
         </p> 
         <button type="submit">Submit</button>
     </form>
+
+    {% if success_message %}
+    <script>
+        // Confetti animation on successful submission
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#ff1493'];
+            const confettiCount = 100;
+
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                document.body.appendChild(confetti);
+
+                // Remove confetti after animation
+                setTimeout(() => confetti.remove(), 3500);
+            }
+        }
+
+        // Trigger confetti on page load if there's a success message
+        createConfetti();
+    </script>
+    {% endif %}
 </body>
 </html>
