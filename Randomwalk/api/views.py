@@ -19,6 +19,7 @@ from .prompts import TREND_PROMPT
 
 # ---------- HTML view for quarter / company selection (coworker-facing) ----------
 
+
 def quarterly_selection_view(request):
     """
     Renders an HTML page where the user can:

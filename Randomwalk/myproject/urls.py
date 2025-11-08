@@ -29,3 +29,5 @@ urlpatterns = [
     # Your health API will be at: /analysis/api/health
     path('analysis/', include('api.urls')),
 ]
+
+
