@@ -37,3 +37,6 @@ def index(request):
     return render(request, 'mailinglist/index.html', {
         'success_message': message_to_show
     })
+
+def earnings(request):
+    return render(request, 'mailinglist/earnings.html')
