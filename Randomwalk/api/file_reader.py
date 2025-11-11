@@ -21,7 +21,8 @@ def _assert_under_data(path: Path) -> None:
 
 def build_doc_path(filename: str) -> Path:
     """
-    Map a filename like 'Amazon_2020_Q1.txt' to DATA_DIR / filename.
+    Map a filename like 'Amazon_2020Q1.txt' to DATA_DIR / filename.
+    (FIXED: Corrected example format in docstring)
     """
     path = (DATA_DIR / filename).resolve()
     _assert_under_data(path)
@@ -30,7 +31,7 @@ def build_doc_path(filename: str) -> Path:
 
 def read_text_from_path(path: Path) -> str:
     """
-    Read text content from a .txt or .pdf file.
+Read text content from a .txt or .pdf file.
     """
     _assert_under_data(path)
 
