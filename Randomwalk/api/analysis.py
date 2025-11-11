@@ -1,9 +1,17 @@
 import time
 import os
-from django.conf import settings # Allows access to BASE_DIR
+import json
+from pathlib import Path
+from django.conf import settings
+
+# 1. IMPORT YOUR TEAMMATE'S NEW HELPER FILES
+from .file_reader import read_text_from_path
+from .llm_router import call_llm
+from .prompts import TREND_PROMPT
+
 
 # =====================================================================
-#   - Determine the list of files to be used.
+# HELPER FUNCTIONS
 # =====================================================================
 
 def get_quarter_options():
@@ -16,14 +24,17 @@ def get_quarter_options():
     quarters.append("2025Q2")
     return quarters
 
+# =====================================================================
+# FUNCTION 1: FILE SELECTION (Your original responsibility)
+# =====================================================================
+
 def get_file_paths_for_range(company, start_q, end_q):
     """
-    (YOUR FUNCTION)
+    (This is the file-path logic, moved into the correct function)
     Takes the user's selections and returns a list of
     full file paths for the teammate to analyze.
     """
-    print(f"[Your Job] Finding files for {company} from {start_q} to {end_q}")
-
+    print(f"[File Job] Finding files for {company} from {start_q} to {end_q}")
     all_quarters = get_quarter_options()
     
     try:
@@ -39,65 +50,107 @@ def get_file_paths_for_range(company, start_q, end_q):
     
     files_to_analyze = []
     for quarter in selected_quarters:
+        
         # ---
-        # ASSUMPTION: Files are named 'Amazon_2020Q1.txt' or 'Microsoft_2020Q1.txt'
-        # Adjust this line if your file naming is different.
+        # The correct filename format
+        # f"{company}_{quarter}.txt"
         file_name = f"{company}_{quarter}.txt"
         # ---
         
-        # This builds the full path, e.g., /path/to/your/project/data/Amazon_2020Q1.txt
-        file_path = os.path.join(settings.BASE_DIR, 'data', file_name)
-        
-        # (Optional but recommended) Check if the file actually exists
-        # if not os.path.exists(file_path):
-        #     raise FileNotFoundError(f"File not found: {file_name}")
-            
+        # Use Path objects like in file_reader.py
+        file_path = Path(settings.BASE_DIR) / 'data' / file_name
         files_to_analyze.append(file_path)
 
-    print(f"[Your Job] Found {len(files_to_analyze)} files. Passing to teammate.")
+    print(f"[File Job] Found {len(files_to_analyze)} files. Passing to analysis.")
     return files_to_analyze
 
 
 # =====================================================================
-# YOUR TEAMMATE'S RESPONSIBILITY: 
-#   - Read files from the list and generate analysis.
+# FUNCTION 2: ANALYSIS LOGIC (Your teammate's logic)
 # =====================================================================
 
-def run_teammate_analysis(file_path_list):
+def generate_trend_analysis(file_path_list, company, start_q, end_q):
     """
-    (TEAMMATE'S FUNCTION)
-    This is a placeholder for your teammate's analysis code.
-    It receives the list of file paths you generated.
-    It should return a single string with the analysis results.
+    (This is the analysis logic, moved into the correct function)
+    This function takes the file list and other selections,
+    reads the files, calls the LLM, and returns a
+    formatted string for the webpage.
     """
-    print(f"[Teammate] Received {len(file_path_list)} files to analyze.")
+    print(f"[Analysis Job] Received {len(file_path_list)} files. Starting analysis.")
     
-    # --- START OF TEAMMATE'S PLACEHOLDER ---
-    # Your teammate will replace all this logic.
-    
-    time.sleep(0.5) # Simulate analysis time
-    
-    if not file_path_list:
-        return "No files were selected for analysis."
+    try:
+        # 1. Build context from files
+        context_parts = []
+        used_files = []
+        
+        for path in file_path_list:
+            filename = path.name # Get filename from Path object
+            try:
+                # read_text_from_path takes a Path object, which we have
+                text = read_text_from_path(path)
+                snippet = text[:8000] # Use 8000 char limit
+                
+                context_parts.append(f"[FILE: {filename}]\n{snippet}")
+                used_files.append(filename)
+            except FileNotFoundError:
+                context_parts.append(f"[FILE: {filename}] ERROR: File not found.")
+            except Exception as e:
+                context_parts.append(f"[FILE: {filename}] ERROR: {e}")
 
-    # Your teammate would loop through the files and read them:
-    # analysis_summary = ""
-    # for path in file_path_list:
-    #     with open(path, 'r') as f:
-    #         content = f.read()
-    #         # ... (do complex analysis on content) ...
-    #         analysis_summary += ...
-    
-    # This demo just lists the files it was given
-    file_names_for_display = [os.path.basename(f) for f in file_path_list]
-    
-    result_string = (
-        f"✅ Analysis Complete.\n"
-        f"Processed {len(file_names_for_display)} files:\n\n"
-        f" - " + "\n - ".join(file_names_for_display)
-        + "\n\n(This is the dummy analysis result. Your teammate's real summary will go here.)"
-    )
-    # --- END OF TEAMMATE'S PLACEHOLDER ---
+        if not used_files:
+            return "Error: No readable documents found for the selected range."
 
-    print("[Teammate] Analysis complete. Returning results string.")
-    return result_string
+        context = "\n\n---\n\n".join(context_parts)
+
+        # 2. Build prompts
+        system_prompt = (
+            "You are an equity analyst. "
+            "Use ONLY the provided context. "
+            "Always return strictly valid JSON following the given schema."
+        )
+
+        # Parse quarters to get year/quarter numbers for the prompt
+        start_y, start_q_num = start_q.split('Q')
+        end_y, end_q_num = end_q.split('Q')
+        
+        # Guess the ticker
+        ticker = "AMZN" if company == "Amazon" else "MSFT"
+
+        user_prompt = TREND_PROMPT.format(
+            ticker=ticker,
+            start_q=start_q_num,
+            start_y=start_y,
+            end_q=end_q_num,
+            end_y=end_y,
+        ) + "\n\nContext starts below:\n\n" + context
+
+        # 3. Call LLM
+        # Using "gpt-4o" as the default
+        print("[Analysis Job] Calling LLM... This may take a moment.")
+        analysis_json_str = call_llm("gpt-4o", system_prompt, user_prompt)
+        print("[Analysis Job] LLM call complete.")
+        
+        # 4. Format the JSON result for the webpage
+        try:
+            analysis_data = json.loads(analysis_json_str)
+            # Convert the Python dictionary back into a nicely formatted JSON string
+            formatted_json_output = json.dumps(analysis_data, indent=2)
+        except Exception:
+            # If the LLM didn't return valid JSON, just show the raw text
+            formatted_json_output = analysis_json_str
+
+        # Build the final string for the <pre> tag in the HTML
+        result_string = (
+            f"✅ Analysis Complete for {company} ({start_q} to {end_q})\n"
+            f"Model Used: gpt-4o\n"
+            f"Documents Used: {', '.join(used_files)}\n\n"
+            f"--- ANALYSIS SUMMARY (JSON) ---\n"
+            f"{formatted_json_output}"
+        )
+        
+        return result_string
+
+    except Exception as e:
+        # Catch any errors during the analysis
+        print(f"[Analysis Job] Analysis failed: {e}")
+        return f"An unexpected error occurred during analysis: {str(e)}"
