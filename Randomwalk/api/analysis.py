@@ -25,7 +25,7 @@ def get_quarter_options():
     return quarters
 
 # =====================================================================
-# FUNCTION 1: FILE SELECTION (Your original responsibility)
+# FUNCTION 1: FILE SELECTION
 # =====================================================================
 
 def get_file_paths_for_range(company, start_q, end_q):
@@ -66,7 +66,7 @@ def get_file_paths_for_range(company, start_q, end_q):
 
 
 # =====================================================================
-# FUNCTION 2: ANALYSIS LOGIC (Your teammate's logic)
+# FUNCTION 2: ANALYSIS LOGIC
 # =====================================================================
 
 def generate_trend_analysis(file_path_list, company, start_q, end_q):
