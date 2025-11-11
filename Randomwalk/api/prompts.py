@@ -24,8 +24,8 @@ Return a valid JSON object with this structure:
         {"year": 2023, "quarter": 2, "note": "..."}
       ],
       "evidence": [
-        {"file": "Amazon_2020_Q1.txt", "quote": "..."},
-        {"file": "Amazon_2020_Q2.txt", "quote": "..."}
+        {"file": "Amazon_2020Q1.txt", "quote": "..."},
+        {"file": "Amazon_2020Q2.txt", "quote": "..."}
       ]
     }
   ],
@@ -35,7 +35,7 @@ Return a valid JSON object with this structure:
       "quarter": 3,
       "description": "...",
       "evidence": [
-        {"file": "Amazon_2020_Q3.txt", "quote": "..."}
+        {"file": "Amazon_2020Q3.txt", "quote": "..."}
       ]
     }
   ],
@@ -44,7 +44,7 @@ Return a valid JSON object with this structure:
       "name": "...",
       "description": "...",
       "evidence": [
-        {"file": "Amazon_2020_Q4.txt", "quote": "..."}
+        {"file": "Amazon_2020Q4.txt", "quote": "..."}
       ]
     }
   ]
