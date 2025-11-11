@@ -1,8 +1,10 @@
 from django.urls import path
-from .views import health, analyze
+
+from . import views
+
+# This maps the root URL (yourwebsite.com/) to the 'quarterly_selection_view'
 
 urlpatterns = [
-    path('health', health, name='health'),
-    path('analyze', analyze, name='analyze'),
+    path('', views.quarterly_selection_view, name='quarterly_selection'),
 ]
 

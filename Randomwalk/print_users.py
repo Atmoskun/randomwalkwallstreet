@@ -6,7 +6,6 @@ Run this from the Randomwalk directory using: python print_users.py
 import sqlite3
 import os
 
-
 def print_all_users():
     """Print all user submissions directly from the SQLite database."""
     

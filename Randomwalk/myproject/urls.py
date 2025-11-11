@@ -19,8 +19,9 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
     path('', include('mailinglist.urls')),   # coworker's frontend routes
-    path('api/', include('api.urls')),       # your LLM backend routes
+
 ]
 
 
