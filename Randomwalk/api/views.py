@@ -5,7 +5,10 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 
 # Frontend selection helpers (coworker logic)
-from .analysis import get_file_paths_for_range, run_teammate_analysis
+# ---
+# This import is now correct and matches api/analysis.py
+from .analysis import get_file_paths_for_range, generate_trend_analysis
+# ---
 
 # Backend API helpers (your LLM orchestration logic)
 from .file_reader import build_doc_path, read_text_from_path
@@ -37,7 +40,7 @@ def quarterly_selection_view(request):
       - select start and end quarter
     On POST:
       - uses get_file_paths_for_range(...) to build the file list
-      - calls run_teammate_analysis(file_list) to get analysis
+      - calls generate_trend_analysis(file_list) to get analysis
       - shows the analysis result on the page
 
     This view is for the interactive web UI (server-rendered).
@@ -52,16 +55,24 @@ def quarterly_selection_view(request):
 
     if request.method == "POST":
         try:
-            # Build the list of files based on the selected range.
+            # ---
+            # This is the correct, two-step logic
+            # ---
+            
+            # 1. Call the file selection function
             file_list_to_process = get_file_paths_for_range(
                 selected_company,
                 selected_start,
                 selected_end,
             )
 
-            # Delegate the actual analysis to the teammate's function.
-            # Implementation of run_teammate_analysis lives in analysis.py.
-            analysis_result = run_teammate_analysis(file_list_to_process)
+            # 2. Call the analysis function with the list of files
+            analysis_result = generate_trend_analysis(
+                file_list_to_process,
+                selected_company,
+                selected_start,
+                selected_end
+            )
 
         except ValueError as e:
             analysis_result = f"Error: {str(e)}\n\nPlease select a valid range."
@@ -97,6 +108,8 @@ def health(request):
 def analyze(request):
     """
     POST /api/analyze
+    
+    (FIXED: Corrected example format in docstring)
 
     Expected JSON body:
     {
@@ -105,10 +118,10 @@ def analyze(request):
       "end":   { "year": 2020, "quarter": 4 },
       "model": "gpt-4o",
       "doc_files": [
-        "Amazon_2020_Q1.txt",
-        "Amazon_2020_Q2.txt",
-        "Amazon_2020_Q3.txt",
-        "Amazon_2020_Q4.txt"
+        "Amazon_2020Q1.txt",
+        "Amazon_2020Q2.txt",
+        "Amazon_2020Q3.txt",
+        "Amazon_2020Q4.txt"
       ]
     }
 
@@ -128,8 +141,8 @@ def analyze(request):
         return HttpResponseBadRequest("Invalid JSON body")
 
     ticker = data.get("ticker")
-    start = data.get("start")        # dict: {"year": int, "quarter": int}
-    end_ = data.get("end")           # dict: {"year": int, "quarter": int}
+    start = data.get("start")      # dict: {"year": int, "quarter": int}
+    end_ = data.get("end")         # dict: {"year": int, "quarter": int}
     doc_files = data.get("doc_files", [])
     model = data.get("model", "gpt-4o")
 
@@ -203,4 +216,3 @@ def analyze(request):
         },
         json_dumps_params={"ensure_ascii": False},
     )
-
