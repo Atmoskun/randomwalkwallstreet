@@ -4,8 +4,10 @@ import json
 from pathlib import Path
 from django.conf import settings
 
-# 1. IMPORT YOUR TEAMMATE'S NEW HELPER FILES
-from .file_reader import read_text_from_path
+
+# Import build_doc_path
+from .file_reader import read_text_from_path, build_doc_path
+# ---
 from .llm_router import call_llm
 from .prompts import TREND_PROMPT
 
@@ -53,12 +55,15 @@ def get_file_paths_for_range(company, start_q, end_q):
         
         # ---
         # The correct filename format
-        # f"{company}_{quarter}.txt"
         file_name = f"{company}_{quarter}.txt"
         # ---
         
-        # Use Path objects like in file_reader.py
-        file_path = Path(settings.BASE_DIR) / 'data' / file_name
+        # ---
+        # FIX 2: Use the centralized build_doc_path function
+        # This is much cleaner and safer.
+        file_path = build_doc_path(file_name)
+        # ---
+        
         files_to_analyze.append(file_path)
 
     print(f"[File Job] Found {len(files_to_analyze)} files. Passing to analysis.")
@@ -69,7 +74,10 @@ def get_file_paths_for_range(company, start_q, end_q):
 # FUNCTION 2: ANALYSIS LOGIC
 # =====================================================================
 
-def generate_trend_analysis(file_path_list, company, start_q, end_q):
+# ---
+# Add 'ticker' as an argument to the function
+def generate_trend_analysis(file_path_list, company, start_q, end_q, ticker):
+# ---
     """
     (This is the analysis logic, moved into the correct function)
     This function takes the file list and other selections,
@@ -113,8 +121,10 @@ def generate_trend_analysis(file_path_list, company, start_q, end_q):
         start_y, start_q_num = start_q.split('Q')
         end_y, end_q_num = end_q.split('Q')
         
-        # Guess the ticker
-        ticker = "AMZN" if company == "Amazon" else "MSFT"
+        # ---
+        # FIX 3: The ticker is now passed in, so we remove the guess
+        # (REMOVED) ticker = "AMZN" if company == "Amazon" else "MSFT"
+        # ---
 
         user_prompt = TREND_PROMPT.format(
             ticker=ticker,
