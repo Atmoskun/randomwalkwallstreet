@@ -4,13 +4,17 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 
-# Frontend selection helpers (coworker logic)
+# Frontend selection helpers
 # ---
-# This import is now correct and matches api/analysis.py
-from .analysis import get_file_paths_for_range, generate_trend_analysis
+# FIX 1: Import get_quarter_options from analysis, don't define it here
+from .analysis import (
+    get_file_paths_for_range,
+    generate_trend_analysis,
+    get_quarter_options
+)
 # ---
 
-# Backend API helpers (your LLM orchestration logic)
+# Backend API helpers
 from .file_reader import build_doc_path, read_text_from_path
 from .llm_router import call_llm
 from .prompts import TREND_PROMPT
@@ -18,20 +22,7 @@ from .prompts import TREND_PROMPT
 
 # ---------- HTML view for quarter / company selection (coworker-facing) ----------
 
-def get_quarter_options():
-    """
-    Build the list of available quarter options for the dropdown.
-    Adjust the range as needed when new data is added.
-    """
-    quarters = []
-    for year in range(2020, 2025):
-        for quarter in range(1, 5):
-            quarters.append(f"{year}Q{quarter}")
-    # Explicit extra entries in case data exists beyond the loop
-    quarters.append("2025Q1")
-    quarters.append("2025Q2")
-    return quarters
-
+# The get_quarter_options() function is now imported from api/analysis.py (see above)
 
 def quarterly_selection_view(request):
     """
@@ -46,7 +37,7 @@ def quarterly_selection_view(request):
     This view is for the interactive web UI (server-rendered).
     """
     company_options = ["Amazon", "Microsoft"]
-    quarter_options = get_quarter_options()
+    quarter_options = get_quarter_options() # This now calls the imported function
 
     analysis_result = None
     selected_company = request.POST.get("company")
@@ -66,12 +57,18 @@ def quarterly_selection_view(request):
                 selected_end,
             )
 
-            # 2. Call the analysis function with the list of files
+            # ---
+            # Determine the ticker here
+            ticker = "AMZN" if selected_company == "Amazon" else "MSFT"
+            # ---
+
+            # 2. Call the analysis function with the list of files AND the ticker
             analysis_result = generate_trend_analysis(
                 file_list_to_process,
                 selected_company,
                 selected_start,
-                selected_end
+                selected_end,
+                ticker # Pass the ticker as an argument
             )
 
         except ValueError as e:
