@@ -105,5 +105,6 @@ litellm
 dj-database-url
 gunicorn
 whitenoise
+psycopg2-binary
 
 
