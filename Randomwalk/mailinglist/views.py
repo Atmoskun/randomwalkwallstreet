@@ -1,6 +1,6 @@
 # mailinglist/views.py
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect  # <--- CHANGED: Added redirect
 from .models import Submission  # Import your Submission model
 
 def index(request):
@@ -22,8 +22,9 @@ def index(request):
                 email=email_from_form
             )
             
-            # 6. Prepare a "Submission successful" message
-            message_to_show = "Submission successful! Thank you, " + name_from_form
+            # 6. Submission is successful! Redirect to the analysis page.
+            #    This is the line you wanted to change.
+            return redirect('/analysis/') # <--- CHANGED: This is the new line
         
         else:
             # 7. If someone bypassed the HTML 'required' attribute
@@ -31,9 +32,8 @@ def index(request):
 
     # 8. 
     # Render the index.html webpage
-    # And pass the 'success_message' variable to the HTML
-    #
-    # (Note: The path must match yours, e.g., 'mailinglist/index.html')
+    # This part now only runs for the *first* page load (GET request)
+    # or if the form submission was invalid.
     return render(request, 'mailinglist/index.html', {
         'success_message': message_to_show
     })
