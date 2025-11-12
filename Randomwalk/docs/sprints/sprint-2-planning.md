@@ -18,12 +18,3 @@ Sarah Zhang → integration and testing
 Identified risks:
 LLM API limits access; Long files may cause slow responses.
 
-Sprint 3 Preview
-
-Sprint goal: Make the MVP more user-friendly and reliable.
-
-Tentatively selected user stories:
-  Add evidence viewer (5 pts)
-  Support multiple LLMs (5 pts)
-  Improve text handling for long files (3 pts)
-  Deploy stable version to staging (3 pts)
