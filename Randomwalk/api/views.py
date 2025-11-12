@@ -1,28 +1,23 @@
 import json
-
-from django.shortcuts import render
+import traceback  # <--- ADD THIS IMPORT AT THE TOP
+from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 
-# Frontend selection helpers
-# ---
-# FIX 1: Import get_quarter_options from analysis, don't define it here
+# Import your analysis functions
 from .analysis import (
-    get_file_paths_for_range,
+    get_file_paths_for_range, 
     generate_trend_analysis,
-    get_quarter_options
+    get_quarter_options  # <--- Import the helper
 )
-# ---
 
-# Backend API helpers
+# Backend API helpers (your LLM orchestration logic)
 from .file_reader import build_doc_path, read_text_from_path
 from .llm_router import call_llm
 from .prompts import TREND_PROMPT
 
 
 # ---------- HTML view for quarter / company selection (coworker-facing) ----------
-
-# The get_quarter_options() function is now imported from api/analysis.py (see above)
 
 def quarterly_selection_view(request):
     """
@@ -31,13 +26,13 @@ def quarterly_selection_view(request):
       - select start and end quarter
     On POST:
       - uses get_file_paths_for_range(...) to build the file list
-      - calls generate_trend_analysis(file_list) to get analysis
+      - calls generate_trend_analysis(...) to get analysis
       - shows the analysis result on the page
 
     This view is for the interactive web UI (server-rendered).
     """
     company_options = ["Amazon", "Microsoft"]
-    quarter_options = get_quarter_options() # This now calls the imported function
+    quarter_options = get_quarter_options() # Use the imported function
 
     analysis_result = None
     selected_company = request.POST.get("company")
@@ -46,37 +41,37 @@ def quarterly_selection_view(request):
 
     if request.method == "POST":
         try:
-            # ---
-            # This is the correct, two-step logic
-            # ---
-            
-            # 1. Call the file selection function
+            # 1. Build the list of files based on the selected range.
             file_list_to_process = get_file_paths_for_range(
                 selected_company,
                 selected_start,
                 selected_end,
             )
-
-            # ---
-            # Determine the ticker here
+            
+            # 2. Determine the ticker
             ticker = "AMZN" if selected_company == "Amazon" else "MSFT"
-            # ---
 
-            # 2. Call the analysis function with the list of files AND the ticker
+            # 3. Delegate the actual analysis to the teammate's function.
             analysis_result = generate_trend_analysis(
                 file_list_to_process,
                 selected_company,
                 selected_start,
                 selected_end,
-                ticker # Pass the ticker as an argument
+                ticker  # Pass the ticker
             )
 
-        except ValueError as e:
-            analysis_result = f"Error: {str(e)}\n\nPlease select a valid range."
         except FileNotFoundError as e:
             analysis_result = f"Error: Missing data file.\n\n{str(e)}"
+        except ValueError as e:
+            analysis_result = f"Error: {str(e)}\n\nPlease select a valid range."
         except Exception as e:
-            analysis_result = f"An unexpected error occurred: {str(e)}"
+            # *** THIS IS THE IMPROVED ERROR MESSAGE ***
+            # It will now print the full, detailed error to the webpage
+            error_details = traceback.format_exc()
+            analysis_result = (
+                f"An unexpected error occurred in views.py:\n{str(e)}\n\n"
+                f"Full Traceback:\n{error_details}"
+            )
 
     context = {
         "company_options": company_options,
@@ -105,8 +100,6 @@ def health(request):
 def analyze(request):
     """
     POST /api/analyze
-    
-    (FIXED: Corrected example format in docstring)
 
     Expected JSON body:
     {
@@ -121,12 +114,6 @@ def analyze(request):
         "Amazon_2020Q4.txt"
       ]
     }
-
-    This is a pure API endpoint for your frontend / other services:
-      - It reads the requested files from the /data directory.
-      - It builds a contextual prompt.
-      - It calls the selected LLM via llm_router.call_llm.
-      - It returns a structured JSON summary.
     """
     if request.method != "POST":
         return JsonResponse({"detail": "Method not allowed"}, status=405)
