@@ -19,6 +19,7 @@ Peter Yang → backend
 Sarah Zhang → integration and testing
 
 Identified risks:
-LLM API limits access; Long files may cause slow responses.
-
-
+Deploying a Django app to Render for the first time will have unforeseen configuration challenges.
+Merging two separate apps built by different developers will be complex.
+LLM API limits access.
+Long files may cause slow responses.
