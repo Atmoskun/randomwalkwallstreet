@@ -14,43 +14,42 @@ Your task:
 5. For each conclusion, include at least one short supporting quote with its source filename.
 
 Return a valid JSON object with this structure:
-{
+{{
   "themes": [
-    {
+    {{
       "name": "...",
       "summary": "...",
       "quarters": [
-        {"year": 2023, "quarter": 1, "note": "..."},
-        {"year": 2023, "quarter": 2, "note": "..."}
+        {{"year": 2023, "quarter": 1, "note": "..."}},
+        {{"year": 2023, "quarter": 2, "note": "..."}}
       ],
       "evidence": [
-        {"file": "Amazon_2020Q1.txt", "quote": "..."},
-        {"file": "Amazon_2020Q2.txt", "quote": "..."}
+        {{"file": "Amazon_2020Q1.txt", "quote": "..."}},
+        {{"file": "Amazon_2020Q2.txt", "quote": "..."}}
       ]
-    }
+    }}
   ],
   "turning_points": [
-    {
+    {{
       "year": 2023,
       "quarter": 3,
       "description": "...",
       "evidence": [
-        {"file": "Amazon_2020Q3.txt", "quote": "..."}
+        {{"file": "Amazon_2020Q3.txt", "quote": "..."}}
       ]
-    }
+    }}
   ],
   "risks": [
-    {
+    {{
       "name": "...",
       "description": "...",
       "evidence": [
-        {"file": "Amazon_2020Q4.txt", "quote": "..."}
+        {{"file": "Amazon_2020Q4.txt", "quote": "..."}}
       ]
-    }
+    }}
   ]
-}
+}}
 
 If the context is insufficient, return empty arrays but keep the JSON structure.
 Use only the provided context.
 """
-
