@@ -1,1 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quarterly Data Selection</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl w-full space-y-8">
+        <div>
+            <h1 class="text-center text-3xl font-extrabold text-gray-900">
+                Quarterly Data Selection
+            </h1>
+        </div>
+        
+        <!-- This is the form that collects the user's choices -->
+        <!-- On submit, it sends the data to your 'quarterly_selection_view' function -->
+        <form class="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" 
+              action="{% url 'quarterly_selection' %}" 
+              method="POST">
+            
+            <!-- This tag is a required Django security feature -->
+            {% csrf_token %}
+            
+            <div class="rounded-md shadow-sm -space-y-px">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    <!-- 1. Company Name Dropdown -->
+                    <div>
+                        <label for="company" class="block text-sm font-medium text-gray-700">Company Name</label>
+                        <select id="company" name="company" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <option value="" disabled {% if not selected_company %}selected{% endif %}>Select Company...</option>
+                            {% for company in company_options %}
+                                <option value="{{ company }}" {% if company == selected_company %}selected{% endif %}>
+                                    {{ company }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
+                    <!-- 2. Starting Quarter Dropdown -->
+                    <div>
+                        <label for="start_quarter" class="block text-sm font-medium text-gray-700">Starting Quarter</label>
+                        <select id="start_quarter" name="start_quarter" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <option value="" disabled {% if not selected_start %}selected{% endif %}>Select Quarter...</option>
+                            {% for quarter in quarter_options %}
+                                <option value="{{ quarter }}" {% if quarter == selected_start %}selected{% endif %}>
+                                    {{ quarter }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- 3. Ending Quarter Dropdown -->
+                    <div>
+                        <label for="end_quarter" class="block text-sm font-medium text-gray-700">Ending Quarter</label>
+                        <select id="end_quarter" name="end_quarter" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <option value="" disabled {% if not selected_end %}selected{% endif %}>Select Quarter...</option>
+                            {% for quarter in quarter_options %}
+                                <option value="{{ quarter }}" {% if quarter == selected_end %}selected{% endif %}>
+                                    {{ quarter }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Submit
+                </button>
+            </div>
+        </form>
+
+        <!-- This is the "Output Data" section -->
+        <!-- It will only appear if the 'analysis_result' variable exists -->
+        {% if analysis_result %}
+            <div class="bg-white p-8 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                    Output Data
+                </h2>
+                <!-- The <pre> tag respects whitespace (like newlines and spaces) -->
+                <!-- This is perfect for showing the formatted text from the AI -->
+                <div class="bg-gray-50 p-4 rounded-md overflow-x-auto">
+                    <pre class="text-sm text-gray-700 whitespace-pre-wrap font-sans">{{ analysis_result }}</pre>
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+</body>
+</html>
