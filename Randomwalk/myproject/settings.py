@@ -10,26 +10,53 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+"""
+Django settings for myproject project.
+"""
+
 from pathlib import Path
+import os
+import dj_database_url
+from dotenv import load_dotenv # <-- Moved to top
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# ---
+# Load .env file from the project root (one level above this 'myproject' folder)
+# This MUST be at the top, before settings are used.
+# ---
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-w=a*g)@@a(kq*#)h-ywojh4*i2w8dk5adk*1j)ulr$(q-h@gbn'
+# ---
+# SECRET KEY (CRITICAL SECURITY CHANGE)
+# ---
+# This pulls the key from Render's Environment Variables, NOT the file.
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = [
-    '.onrender.com',
-    'localhost',  
-    '127.0.0.1'
-]
+# ---
+# DEBUG (CRITICAL SECURITY CHANGE)
+# ---
+# This will be 'False' on Render, but 'True' locally if you set DEBUG=True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
+
+# ---
+# ALLOWED HOSTS
+# ---
+# This automatically adds your Render website URL.
+# It is safer than your teammate's '.onrender.com'
+ALLOWED_HOSTS = []
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# Add 'localhost' and '127.0.0.1' for local testing
+ALLOWED_HOSTS.append('127.0.0.1')
+ALLOWED_HOSTS.append('localhost')
 
 
 # Application definition
@@ -40,13 +67,15 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic', # <-- ADD THIS for production
     'django.contrib.staticfiles',
-    'mailinglist',
-    'api',
+    'mailinglist', 
+    'api',         
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # <-- ADD THIS (near the top)
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -60,7 +89,13 @@ ROOT_URLCONF = 'myproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        # ---
+        # ADD paths to your template folders here
+        # ---
+        'DIRS': [
+            BASE_DIR / 'api/templates',
+            BASE_DIR / 'mailinglist/templates', # Added for your teammate
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -76,8 +111,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# ---
+# DATABASE (CRITICAL CHANGE)
+# ---
+# This uses Render's free Postgres database when on Render,
+# but keeps your local db.sqlite3 for local testing.
 
 DATABASES = {
     'default': {
@@ -86,54 +124,46 @@ DATABASES = {
     }
 }
 
+# This 'if' statement is the magic.
+# It checks if the DATABASE_URL (from Render) exists.
+if 'DATABASE_URL' in os.environ:
+    DATABASES['default'] = dj_database_url.parse(os.environ.get('DATABASE_URL'))
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
 ]
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# ---
+# STATIC FILES (For Whitenoise/Render)
+# ---
 STATIC_URL = 'static/'
+# This is where 'collectstatic' will put files for production
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+# This tells Render how to handle static files
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-from pathlib import Path
-import os
-from dotenv import load_dotenv
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Load environment variables from .env at project root
-load_dotenv(os.path.join(BASE_DIR.parent, ".env"))
-
+# Your teammate's dotenv logic was moved to the top of the file.
