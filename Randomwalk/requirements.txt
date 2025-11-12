@@ -100,13 +100,10 @@ wheel==0.45.1
 xlrd==2.0.2
 yfinance==0.2.65
 
-PACKAGES FOR YOUR API APP & RENDER
-
 pypdf
 litellm
 dj-database-url
 gunicorn
-whitenoise
 whitenoise
 
 
