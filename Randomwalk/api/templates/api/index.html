@@ -27,7 +27,6 @@
         </div>
         
         <!-- This is the form that collects the user's choices -->
-        <!-- On submit, it sends the data to your 'quarterly_selection_view' function -->
         <form class="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" 
               action="{% url 'quarterly_selection' %}" 
               method="POST">
@@ -42,8 +41,9 @@
                     <div>
                         <label for="company" class="block text-sm font-medium text-gray-700">Company Name</label>
                         <select id="company" name="company" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <!-- FIXED: Changed 'company_options' to 'companies' -->
                             <option value="" disabled {% if not selected_company %}selected{% endif %}>Select Company...</option>
-                            {% for company in company_options %}
+                            {% for company in companies %}
                                 <option value="{{ company }}" {% if company == selected_company %}selected{% endif %}>
                                     {{ company }}
                                 </option>
@@ -55,8 +55,9 @@
                     <div>
                         <label for="start_quarter" class="block text-sm font-medium text-gray-700">Starting Quarter</label>
                         <select id="start_quarter" name="start_quarter" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <!-- FIXED: Changed 'quarter_options' to 'quarters' -->
                             <option value="" disabled {% if not selected_start %}selected{% endif %}>Select Quarter...</option>
-                            {% for quarter in quarter_options %}
+                            {% for quarter in quarters %}
                                 <option value="{{ quarter }}" {% if quarter == selected_start %}selected{% endif %}>
                                     {{ quarter }}
                                 </option>
@@ -68,8 +69,9 @@
                     <div>
                         <label for="end_quarter" class="block text-sm font-medium text-gray-700">Ending Quarter</label>
                         <select id="end_quarter" name="end_quarter" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <!-- FIXED: Changed 'quarter_options' to 'quarters' -->
                             <option value="" disabled {% if not selected_end %}selected{% endif %}>Select Quarter...</option>
-                            {% for quarter in quarter_options %}
+                            {% for quarter in quarters %}
                                 <option value="{{ quarter }}" {% if quarter == selected_end %}selected{% endif %}>
                                     {{ quarter }}
                                 </option>
