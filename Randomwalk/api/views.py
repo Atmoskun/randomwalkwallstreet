@@ -130,3 +130,5 @@ def quarterly_selection_view(request: HttpRequest):
     # 3. Render Template
     # Renders the same template for both GET and POST, passing the updated context
     return render(request, 'api/index.html', context)
+
+
