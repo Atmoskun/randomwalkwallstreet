@@ -29,7 +29,7 @@ def quarterly_selection_view(request):
     }
     # We confirmed this simple template name works with the DIRS configuration
     # Assuming the file is located at Randomwalk/api/templates/index.html
-    return render(request, 'index.html', context)
+    return render(request, 'api/index.html', context)
 
 
 # --- 2. API Endpoint: Health Check (Mapped to 'api/health') ---
@@ -88,5 +88,4 @@ def analyze(request):
     except Exception as e:
         print(f"Server Error during analysis: {e}")
         return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
-    
     
