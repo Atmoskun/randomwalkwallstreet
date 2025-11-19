@@ -2,12 +2,10 @@
 *.env
 myproject/.env
 
-Django
-
+# Django
 *.log
 db.sqlite3
 
-Python
-
-pycache/
+# Python
+__pycache__/
 *.pyc
