@@ -14,10 +14,10 @@ from .analysis import (
 # Backend API helpers (your LLM orchestration logic)
 from .file_reader import build_doc_path, read_text_from_path
 from .llm_router import call_llm
-from .prompts import TREND_PROMPT
+# We need to import the database model we created
+from .models import EarningsCallSummary 
 
-
-# ---------- HTML view for quarter / company selection (coworker-facing) ----------
+# ---------- Helper Functions ----------
 
 
 def quarterly_selection_view(request):
@@ -83,23 +83,15 @@ def quarterly_selection_view(request):
         "selected_end": selected_end,
     }
 
-    # Template path: templates/api/index.html
     return render(request, "api/index.html", context)
 
 
-# ---------- JSON API endpoints for programmatic access (your backend contract) ----------
-
-@csrf_exempt
-def health(request):
-    """
-    Simple health check endpoint: GET /api/health
-    """
-    return JsonResponse({"status": "ok"})
-
+# ---------- JSON API Endpoint (Optional, for external access) ----------
 
 @csrf_exempt
 def analyze(request):
     """
+    API version of the above logic.
     POST /api/analyze
 
     Expected JSON body:
@@ -119,7 +111,6 @@ def analyze(request):
     if request.method != "POST":
         return JsonResponse({"detail": "Method not allowed"}, status=405)
 
-    # Parse JSON payload
     try:
         data = json.loads(request.body.decode("utf-8"))
     except Exception:
