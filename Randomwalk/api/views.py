@@ -5,7 +5,7 @@ from django.views.decorators.http import require_http_methods
 from pathlib import Path
 
 # Import our custom modules
-# We comment out the model import since we decided not to use a DB for now.
+# We comment out the model import since we are not using a DB model for this API logic
 # from .models import EarningsCallSummary 
 from .analysis import (
     generate_trend_analysis, 
@@ -14,21 +14,25 @@ from .analysis import (
 )
 
 
-# --- 1. Web Interface View ---
+# --- 1. Web Interface View (Mapped to '/') ---
 
 def quarterly_selection_view(request):
     """
     Renders the main page with quarter selection options.
+    
+    The critical fix: The template name is 'index.html' because 
+    settings.py already points DIRS to the 'api/templates' folder.
     """
     context = {
         'quarters': get_quarter_options(),
         'companies': ['Amazon', 'Microsoft'] # Hardcoding for now
     }
-    # NOTE: You need to have 'api/index.html' in your templates folder
+    # We confirmed this simple template name works with the DIRS configuration
+    # Assuming the file is located at Randomwalk/api/templates/index.html
     return render(request, 'index.html', context)
 
 
-# --- 2. API Endpoint: Health Check ---
+# --- 2. API Endpoint: Health Check (Mapped to 'api/health') ---
 
 def health(request):
     """
@@ -37,7 +41,7 @@ def health(request):
     return JsonResponse({'status': 'ok', 'message': 'API is running'})
 
 
-# --- 3. API Endpoint: Analysis ---
+# --- 3. API Endpoint: Analysis (Mapped to 'api/analyze') ---
 
 @require_http_methods(["POST"])
 def analyze(request):
@@ -47,13 +51,11 @@ def analyze(request):
     """
     try:
         # 1. Parse JSON Request Body
-        # The frontend will send a POST request with JSON data
         data = json.loads(request.body)
         
         company = data.get('company')
         start_q = data.get('start_quarter')
         end_q = data.get('end_quarter')
-        # Ticker is used inside the prompt
         ticker = company[0:4].upper() 
         
         if not all([company, start_q, end_q]):
@@ -69,7 +71,6 @@ def analyze(request):
             return JsonResponse({'error': f'Data file error: {str(e)}'}, status=500)
         
         # 3. Generate Analysis
-        # The analysis function handles LLM calling and JSON parsing internally
         analysis_result = generate_trend_analysis(
             file_path_list,
             company,
@@ -79,14 +80,13 @@ def analyze(request):
         )
         
         # 4. Return Result
-        # The result is already a human-readable string from analysis.py
         return JsonResponse({'status': 'success', 'result': analysis_result})
 
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON in request body.'}, status=400)
         
     except Exception as e:
-        # Catch-all for unexpected server errors (e.g., API key issue, networking)
         print(f"Server Error during analysis: {e}")
         return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
-# --- End of File ---
+    
+    
