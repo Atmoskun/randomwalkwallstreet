@@ -52,4 +52,7 @@ Return a valid JSON object with this structure:
 
 If the context is insufficient, return empty arrays but keep the JSON structure.
 Use only the provided context.
+
+# IMPORTANT: Your entire output must be ONLY the raw JSON object.
+# Do not include any text before, after, or around the JSON structure.
 """

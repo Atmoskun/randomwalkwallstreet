@@ -112,7 +112,7 @@ def generate_trend_analysis(file_path_list, company, start_q, end_q, ticker):
         # Step 3a: Call the LLM
         # This is where API Key errors, rate limits, etc. will happen
         result = call_llm(
-            model_name="gpt-4o",  # Using a powerful model by default
+            model_name="gemini/gemini-1.5-flash",  # Using a powerful model by default
             system_prompt=system_prompt,
             user_prompt=user_prompt,
         )
