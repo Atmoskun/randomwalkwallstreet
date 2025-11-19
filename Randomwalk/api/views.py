@@ -24,8 +24,8 @@ def quarterly_selection_view(request):
         'quarters': get_quarter_options(),
         'companies': ['Amazon', 'Microsoft'] # Hardcoding for now
     }
-    # NOTE: You need to have 'api/quarterly_selection.html' in your templates folder
-    return render(request, 'api/quarterly_selection.html', context)
+    # NOTE: You need to have 'api/index.html' in your templates folder
+    return render(request, 'index.html', context)
 
 
 # --- 2. API Endpoint: Health Check ---
