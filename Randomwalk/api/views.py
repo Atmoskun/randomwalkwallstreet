@@ -1,7 +1,7 @@
 import time
 from django.shortcuts import render
 from django.http import HttpRequest
-from django.views.decorators.csrf import csrf_exempt # <-- New required import
+from django.views.decorators.csrf import csrf_exempt 
 
 # --- Constants for Simulation ---
 # NOTE: API key handling is managed by the canvas environment.
@@ -79,8 +79,8 @@ async def call_gemini_api(data_prompt: str) -> str:
     # --- END MOCK API CALL RESULT ---
 
 # --- Main View Function ---
-@csrf_exempt # <--- This decorator bypasses the 403 CSRF error for POST requests
-def quarterly_selection_view(request: HttpRequest):
+@csrf_exempt 
+async def quarterly_selection_view(request: HttpRequest): # <-- 1. Added 'async' here
     """
     Renders the main page and handles form submission for financial analysis.
     This function handles both GET (initial load) and POST (form submission) requests.
@@ -115,7 +115,7 @@ def quarterly_selection_view(request: HttpRequest):
                 raw_data = get_stock_data(company, start_q, end_q)
                 
                 # Call the analysis function (simulated)
-                analysis_text = call_gemini_api(raw_data) 
+                analysis_text = await call_gemini_api(raw_data) # <-- 2. Added 'await' here
                 
                 # Add the final analysis text to the context
                 context['analysis_result'] = analysis_text
@@ -130,5 +130,4 @@ def quarterly_selection_view(request: HttpRequest):
     # 3. Render Template
     # Renders the same template for both GET and POST, passing the updated context
     return render(request, 'api/index.html', context)
-
 
