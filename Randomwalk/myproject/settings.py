@@ -26,12 +26,35 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'default-insecure-key-for-local')
 # Reads DEBUG setting from environment, defaults to False for safety
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# ALLOWED HOSTS
+# ---
+# 1. ALLOWED HOSTS (Corrected and Consolidated Block)
+# ---
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '::1']
 
+# Standard Render external hostname configuration
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# Explicitly add the specific Render and Codespaces domains and internal host for deployment stability
+ALLOWED_HOSTS.extend([
+    'randomwalkwallstreet.onrender.com', 
+    'webserver', # Internal hostname for Render container
+    # Add your codespaces domain pattern here if needed, or rely on the host being proxied correctly
+])
+
+# ---
+# 2. CSRF Trusted Origins (For deployment environments)
+# ---
+# This is required to prevent CSRF errors when submitting forms from certain origins (like proxies/ports).
+CSRF_TRUSTED_ORIGINS = [
+    'https://localhost:8000', 
+    'http://localhost:8000', 
+    'https://127.0.0.1:8000',
+    'http://127.0.0.1:8000',
+    f'https://{os.environ.get("RENDER_EXTERNAL_HOSTNAME")}' if RENDER_EXTERNAL_HOSTNAME else '',
+    'https://randomwalkwallstreet.onrender.com',
+]
 
 
 # Application definition
@@ -51,7 +74,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # For production static files
+    # WhiteNoise must come right after SecurityMiddleware for static file handling
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -63,7 +87,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'myproject.urls'
 
 # ---
-# TEMPLATES (The critical section for your last error)
+# TEMPLATES 
 # ---
 TEMPLATES = [
     {
@@ -103,7 +127,7 @@ if 'DATABASE_URL' in os.environ:
     DATABASES['default'] = dj_database_url.parse(os.environ.get('DATABASE_URL'))
 
 
-# Password validation
+# Password validation (Standard)
 AUTH_PASSWORD_VALIDATORS = [
     { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
     { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
@@ -112,7 +136,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
+# Internationalization (Standard)
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
@@ -120,10 +144,11 @@ USE_TZ = True
 
 
 # ---
-# STATIC FILES (For Whitenoise/Render)
+# STATIC FILES (WhiteNoise/Render Configuration)
 # ---
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Use the CompressedManifestStaticFilesStorage backend for WhiteNoise in production
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
@@ -131,26 +156,3 @@ STORAGES = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# settings.py
-
-# ALLOWED_HOSTS
-# A list of strings representing the host/domain names that this Django site can serve.
-# When DEBUG is False, this is a security measure to prevent HTTP Host header attacks.
-# We include 'localhost' and '127.0.0.1' for local development.
-# If you are accessing the server using its network IP (e.g., 192.168.x.x), you should add that here too.
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '::1']
-
-
-# settings.py
-
-# CSRF_TRUSTED_ORIGINS
-# A list of trusted origins for unsafe requests (like POST) when the Origin header is present.
-# The error message shows the failed origin is 'https://localhost:8000'.
-# We add both HTTP and HTTPS versions for localhost development on port 8000 to cover all cases.
-CSRF_TRUSTED_ORIGINS = [
-    'https://localhost:8000', 
-    'http://localhost:8000', 
-    'https://127.0.0.1:8000',
-    'http://127.0.0.1:8000',
-]
