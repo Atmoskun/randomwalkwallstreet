@@ -131,3 +131,26 @@ STORAGES = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# settings.py
+
+# ALLOWED_HOSTS
+# A list of strings representing the host/domain names that this Django site can serve.
+# When DEBUG is False, this is a security measure to prevent HTTP Host header attacks.
+# We include 'localhost' and '127.0.0.1' for local development.
+# If you are accessing the server using its network IP (e.g., 192.168.x.x), you should add that here too.
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '::1']
+
+
+# settings.py
+
+# CSRF_TRUSTED_ORIGINS
+# A list of trusted origins for unsafe requests (like POST) when the Origin header is present.
+# The error message shows the failed origin is 'https://localhost:8000'.
+# We add both HTTP and HTTPS versions for localhost development on port 8000 to cover all cases.
+CSRF_TRUSTED_ORIGINS = [
+    'https://localhost:8000', 
+    'http://localhost:8000', 
+    'https://127.0.0.1:8000',
+    'http://127.0.0.1:8000',
+]

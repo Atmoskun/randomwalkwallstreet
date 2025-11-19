@@ -2,12 +2,12 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # 1. This is the path for your webpage (the homepage)
+    # Main page view (default path for the app)
     path('', views.quarterly_selection_view, name='quarterly_selection'),
     
-    # 2. Add the path for the 'health' function
-    path('api/health', views.health, name='api_health'),
+    # Health check for deployment monitoring - now just '/health'
+    path('health', views.health, name='api_health'),
     
-    # 3. Add the path for the 'analyze' function
-    path('api/analyze', views.analyze, name='api_analyze'),
+    # Analysis API endpoint - now just '/analyze'
+    path('analyze', views.analyze, name='analyze_data'), 
 ]
