@@ -72,7 +72,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Your project apps
     'mailinglist', 
-    'api',         
+    'api',
+    'tracking',
 ]
 
 MIDDLEWARE = [
@@ -85,6 +86,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'tracking.middleware.PageViewMiddleware',
 ]
 
 ROOT_URLCONF = 'myproject.urls'
