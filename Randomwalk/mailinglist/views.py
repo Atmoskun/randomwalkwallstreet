@@ -24,8 +24,8 @@ def index(request):
             
             # 6. Submission is successful! Redirect to the analysis page.
             #    This is the line you wanted to change.
-            return redirect('/analysis/') # <--- CHANGED: This is the new line
-        
+            # return redirect('/analysis/') # <--- CHANGED: This is the new line
+            return redirect('/earnings/')
         else:
             # 7. If someone bypassed the HTML 'required' attribute
             message_to_show = "Please fill out all fields!"
