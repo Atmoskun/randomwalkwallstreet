@@ -4,8 +4,8 @@ Django settings for myproject project.
 
 from pathlib import Path
 import os
-import dj_database_url
-from dotenv import load_dotenv
+# import dj_database_url
+# from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR should point to the 'Randomwalk' directory in your structure.
@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load .env file from the project root (one level above this 'myproject' folder)
 # This handles our GOOGLE_API_KEY, DEBUG, and SECRET_KEY for local testing.
 # ---
-load_dotenv(os.path.join(BASE_DIR, ".env"))
+# load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 
 # ---
@@ -52,9 +52,12 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000', 
     'https://127.0.0.1:8000',
     'http://127.0.0.1:8000',
-    f'https://{os.environ.get("RENDER_EXTERNAL_HOSTNAME")}' if RENDER_EXTERNAL_HOSTNAME else '',
     'https://randomwalkwallstreet.onrender.com',
 ]
+
+render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if render_hostname:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{render_hostname}')
 
 
 # Application definition
@@ -123,8 +126,8 @@ DATABASES = {
     }
 }
 # Use PostgreSQL for Render deployment if URL is present
-if 'DATABASE_URL' in os.environ:
-    DATABASES['default'] = dj_database_url.parse(os.environ.get('DATABASE_URL'))
+# if 'DATABASE_URL' in os.environ:
+#     DATABASES['default'] = dj_database_url.parse(os.environ.get('DATABASE_URL'))
 
 
 # Password validation (Standard)
