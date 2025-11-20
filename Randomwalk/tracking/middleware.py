@@ -7,7 +7,7 @@ class PageViewMiddleware:
 
     def __call__(self, request):
         # Exclude admin paths to avoid tracking admin activity
-        if 'admin' in request.path:
+        if request.path.startswith('/admin'):
             return self.get_response(request)
 
         # Update visit count
@@ -22,6 +22,9 @@ class PageViewMiddleware:
         response = self.get_response(request)
 
         # Record the visit details after the response is generated
+        if not request.user.is_authenticated:
+            return response
+
         if not request.session.session_key:
             request.session.create()
 
