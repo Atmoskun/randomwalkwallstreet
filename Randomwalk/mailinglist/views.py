@@ -6,7 +6,7 @@ from .models import Submission  # Import your Submission model
 def index(request):
     
     # 1. Prepare an empty message variable
-    message_to_show = "Please fill out all fields!"
+    message_to_show = "Welcome!"
     
     # 2. Check if the user pressed the "Submit" button (POST)
     if request.method == "POST":
