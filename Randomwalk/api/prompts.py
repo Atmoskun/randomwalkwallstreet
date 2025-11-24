@@ -8,57 +8,129 @@ Period: Q{start_q} {start_y} to Q{end_q} {end_y}
 
 Based on the transcripts, perform the following:
 
-Identify 3-6 major, recurring strategic or operational themes (e.g., Cloud CapEx, Supply Chain Resilience, AI Integration, Subscription Pricing Strategy). These themes must be prominent in both management commentary AND analyst questions.
-
-For each identified theme, perform a longitudinal analysis: describe its evolution, how its importance (or the narrative around it) changes from the start quarter to the end quarter.
-
-Highlight 1-3 distinct turning points where management commentary or investor focus clearly shifted (e.g., a formal announcement of a cost-cutting focus, or a sudden escalation in M&A discussion).
-
-List the key risks, uncertainties, or persistent operational concerns mentioned repeatedly by management or raised by multiple analysts.
-
-For each key data point, change description, or risk, include at least one short, verbatim supporting quote and its source filename (e.g., Amazon_2020Q1.txt).
+1. Identify 3-6 major, recurring strategic or operational themes (e.g., Cloud CapEx, Supply Chain Resilience, AI Integration, Subscription Pricing Strategy). These themes must be prominent in both management commentary AND analyst questions.
+2. For each identified theme, perform a longitudinal analysis: describe its evolution, how its importance (or the narrative around it) changes from the start quarter to the end quarter.
+3. Highlight 1-3 distinct turning points where management commentary or investor focus clearly shifted (e.g., a formal announcement of a cost-cutting focus, or a sudden escalation in M&A discussion).
+4. List the key risks, uncertainties, or persistent operational concerns mentioned repeatedly by management or raised by multiple analysts.
+5. For each key data point, change description, or risk, include at least one short, verbatim supporting quote and its source filename (e.g., Amazon_2020Q1.txt).
 
 Return a valid JSON object with this structure:
 {{
-"themes": [
-{{
-"name": "...",
-"summary": "The theme's narrative evolved from X (early period) to Y (recent period).",
-"quarters_evolution": [
-{{"year": 2023, "quarter": 1, "focus": "Initial focus on expansion and market share, with light mention of margins."}},
-{{"year": 2023, "quarter": 2, "focus": "Margins become a dominant topic, driven by analyst pushback on CapEx."}}
-],
-"evidence": [
-{{"file": "Amazon_2020Q1.txt", "quote": "..."}}
-]
-}}
-],
-"turning_points": [
-{{
-"year": 2023,
-"quarter": 3,
-"description": "Clear shift from pure revenue growth guidance to a 'rule of 40' profitability mandate.",
-"evidence": [
-{{"file": "Amazon_2020Q3.txt", "quote": "..."}}
-]
-}}
-],
-"risks": [
-{{
-"name": "...",
-"description": "Recurring concern about X due to Y.",
-"evidence": [
-{{"file": "Amazon_2020Q4.txt", "quote": "..."}}
-]
-}}
-]
+  "themes": [
+    {{
+      "name": "...",
+      "summary": "The theme's narrative evolved from X (early period) to Y (recent period).",
+      "quarters_evolution": [
+        {{"year": 2023, "quarter": 1, "focus": "Initial focus on expansion and market share, with light mention of margins."}},
+        {{"year": 2023, "quarter": 2, "focus": "Margins become a dominant topic, driven by analyst pushback on CapEx."}}
+      ],
+      "evidence": [
+        {{"file": "Amazon_2020Q1.txt", "quote": "..."}}
+      ]
+    }}
+  ],
+  "turning_points": [
+    {{
+      "year": 2023,
+      "quarter": 3,
+      "description": "Clear shift from pure revenue growth guidance to a 'rule of 40' profitability mandate.",
+      "evidence": [
+        {{"file": "Amazon_2020Q3.txt", "quote": "..."}}
+      ]
+    }}
+  ],
+  "risks": [
+    {{
+      "name": "...",
+      "description": "Recurring concern about X due to Y.",
+      "evidence": [
+        {{"file": "Amazon_2020Q4.txt", "quote": "..."}}
+      ]
+    }}
+  ]
 }}
 
 If the context is insufficient, return empty arrays but maintain the overall JSON structure.
 Use only the provided context.
 
-IMPORTANT: Your entire output must be ONLY the raw JSON object.
-
-Do not include any text before, after, or around the JSON structure.
-
+# IMPORTANT: Your entire output must be ONLY the raw JSON object.
+# Do not include any text before, after, or around the JSON structure.
 """
+# JSON Schema for Structured Output (Used by the API call)
+ANALYSIS_SCHEMA = {
+    "type": "OBJECT",
+    "properties": {
+        "themes": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "name": {"type": "STRING", "description": "The major strategic theme."},
+                    "summary": {"type": "STRING", "description": "Summary of how the theme evolved."},
+                    "quarters_evolution": {
+                        "type": "ARRAY",
+                        "items": {
+                            "type": "OBJECT",
+                            "properties": {
+                                "year": {"type": "INTEGER"},
+                                "quarter": {"type": "INTEGER"},
+                                "focus": {"type": "STRING", "description": "Specific focus of this theme in this quarter."}
+                            }
+                        }
+                    },
+                    "evidence": {
+                        "type": "ARRAY",
+                        "items": {
+                            "type": "OBJECT",
+                            "properties": {
+                                "file": {"type": "STRING"},
+                                "quote": {"type": "STRING"}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "turning_points": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "year": {"type": "INTEGER"},
+                    "quarter": {"type": "INTEGER"},
+                    "description": {"type": "STRING"},
+                    "evidence": {
+                        "type": "ARRAY",
+                        "items": {
+                            "type": "OBJECT",
+                            "properties": {
+                                "file": {"type": "STRING"},
+                                "quote": {"type": "STRING"}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "risks": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "name": {"type": "STRING"},
+                    "description": {"type": "STRING"},
+                    "evidence": {
+                        "type": "ARRAY",
+                        "items": {
+                            "type": "OBJECT",
+                            "properties": {
+                                "file": {"type": "STRING"},
+                                "quote": {"type": "STRING"}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
