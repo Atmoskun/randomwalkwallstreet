@@ -5,7 +5,7 @@ import httpx # Import asynchronous HTTP client
 from django.shortcuts import render
 from django.http import HttpRequest
 from django.views.decorators.csrf import csrf_exempt 
-from .prompt import TREND_PROMPT, ANALYSIS_SCHEMA # Import prompt and JSON Schema
+from .prompts import TREND_PROMPT, ANALYSIS_SCHEMA # Import prompt and JSON Schema
 
 # --- Constants for Simulation and API ---
 # NOTE: API key handling is managed by the canvas environment.
