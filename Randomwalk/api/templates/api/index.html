@@ -99,7 +99,7 @@
                 <!-- The <pre> tag respects whitespace (like newlines and spaces) -->
                 <!-- This is perfect for showing the formatted text from the AI -->
                 <div class="bg-gray-50 p-4 rounded-md overflow-x-auto">
-                    <pre class="text-sm text-gray-700 whitespace-pre-wrap font-sans">{{ analysis_result }}</pre>
+                    <pre class="text-sm text-gray-700 whitespace-pre-wrap font-sans">{{ analysis_result|safe }}</pre>
                 </div>
             </div>
         {% endif %}

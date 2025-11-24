@@ -5,10 +5,9 @@ import httpx # Import asynchronous HTTP client
 from django.shortcuts import render
 from django.http import HttpRequest
 from django.views.decorators.csrf import csrf_exempt 
-from .prompts import TREND_PROMPT, ANALYSIS_SCHEMA # Import prompt and JSON Schema
+from .prompts import TREND_PROMPT, ANALYSIS_SCHEMA # 确保这里是 prompts，因为您说您的文件是 prompts.py
 
 # --- Constants for Simulation and API ---
-# NOTE: API key handling is managed by the canvas environment.
 MAX_RETRIES = 5
 GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025"
 API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
@@ -25,6 +24,7 @@ def compare_quarters(q1: str, q2: str) -> int:
     """
     # Converts 'YYYYQZ' format to a comparable integer
     def quarter_to_int(q: str) -> int:
+        # q format is 'YYYYQZ', e.g., '2023Q1'
         year = int(q[:4])
         quarter_num = int(q[5:])
         return year * 10 + quarter_num
@@ -116,7 +116,13 @@ async def call_gemini_api(api_data: dict) -> str:
     user_query = f"Analyze the following file excerpts and output the JSON result according to the provided instructions:\n\n---\n{api_data.get('full_text', 'No content provided.')}\n---\n"
     
     # 2. Prepare API Request Parameters
-    api_key = os.environ.get('GEMINI_API_KEY', "") # In a production environment, set GEMINI_API_KEY env var
+    # FIX: Check for GOOGLE_API_KEY first, then GEMINI_API_KEY as a fallback.
+    api_key = os.environ.get('GOOGLE_API_KEY', os.environ.get('GEMINI_API_KEY', ""))
+    
+    # DEBUG: Print first 4 characters of the key to console to check if it loaded.
+    # Note: If this prints '...', it means the key is still missing in the environment.
+    print(f"DEBUG: API Key Loaded (first 4 chars): {api_key[:4]}...")
+
     api_url = f"{API_URL_BASE}/{GEMINI_MODEL}:generateContent?key={api_key}"
     
     payload = {
@@ -126,7 +132,8 @@ async def call_gemini_api(api_data: dict) -> str:
                 "parts": [{"text": user_query}]
             }
         ],
-        "config": {
+        # --- FIX: Changed "config" to the correct API field "generationConfig" ---
+        "generationConfig": { 
             # Ensure model returns JSON matching the schema
             "responseMimeType": "application/json",
             "responseSchema": ANALYSIS_SCHEMA
@@ -164,7 +171,12 @@ async def call_gemini_api(api_data: dict) -> str:
                 if e.response.status_code == 429 and attempt < MAX_RETRIES - 1:
                     wait_time = 2 ** attempt
                     print(f"Rate limited (429). Retrying in {wait_time} seconds...")
-                    await time.sleep(wait_time)
+                    time.sleep(wait_time) # Use synchronous sleep in this loop context
+                elif e.response.status_code == 400:
+                    # Capture the full 400 error message for debugging
+                    error_message = f"API Error (HTTP 400): {e.response.text}"
+                    print(error_message)
+                    return error_message
                 else:
                     return f"API Error (HTTP {e.response.status_code}): {e.response.text}"
             except Exception as e:

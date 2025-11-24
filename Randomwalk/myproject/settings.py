@@ -5,7 +5,7 @@ Django settings for myproject project.
 from pathlib import Path
 import os
 import dj_database_url
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR should point to the 'Randomwalk' directory in your structure.
@@ -15,7 +15,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load .env file from the project root (one level above this 'myproject' folder)
 # This handles our GOOGLE_API_KEY, DEBUG, and SECRET_KEY for local testing.
 # ---
-# load_dotenv(os.path.join(BASE_DIR, ".env"))
+# NOTE: .env file is expected to be located in the same directory as manage.py
+DOTENV_PATH = os.path.join(BASE_DIR, ".env")
+load_dotenv(DOTENV_PATH)
+
+# CRITICAL DEBUG: Check if the key was loaded from the .env file (for local testing)
+google_key_check = os.environ.get('GOOGLE_API_KEY')
+if google_key_check:
+    print(f"SETTINGS DEBUG: Successfully loaded GOOGLE_API_KEY (First 4 chars: {google_key_check[:4]})")
+else:
+    print(f"SETTINGS DEBUG: WARNING! GOOGLE_API_KEY not found in environment after loading {DOTENV_PATH}")
 
 
 # ---
@@ -55,9 +64,9 @@ CSRF_TRUSTED_ORIGINS = [
     'https://randomwalkwallstreet.onrender.com',
 ]
 
-render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
-if render_hostname:
-    CSRF_TRUSTED_ORIGINS.append(f'https://{render_hostname}')
+# FIX: Only append the dynamic Render host if the environment variable is set.
+if RENDER_EXTERNAL_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
 
 
 # Application definition
@@ -72,8 +81,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Your project apps
     'mailinglist', 
-    'api',
-    'tracking',
+    'api',         
 ]
 
 MIDDLEWARE = [
@@ -86,7 +94,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'tracking.middleware.PageViewMiddleware',
 ]
 
 ROOT_URLCONF = 'myproject.urls'
@@ -122,12 +129,14 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 # DATABASE
 # ---
 DATABASES = {
-    'default': dj_database_url.config(
-        # Replace this value with your local database's connection string.
-        default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
+# Use PostgreSQL for Render deployment if URL is present
+if 'DATABASE_URL' in os.environ:
+    DATABASES['default'] = dj_database_url.parse(os.environ.get('DATABASE_URL'))
 
 
 # Password validation (Standard)
