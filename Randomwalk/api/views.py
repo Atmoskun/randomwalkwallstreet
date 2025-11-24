@@ -5,11 +5,13 @@ import httpx # Import asynchronous HTTP client
 from django.shortcuts import render
 from django.http import HttpRequest
 from django.views.decorators.csrf import csrf_exempt 
-from .prompts import TREND_PROMPT, ANALYSIS_SCHEMA # 确保这里是 prompts，因为您说您的文件是 prompts.py
+# Updated import: Only TREND_PROMPT is needed now
+from .prompts import TREND_PROMPT 
 
 # --- Constants for Simulation and API ---
 MAX_RETRIES = 5
-GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025"
+# 使用最快的模型，对应您提到的 "Gemini 2.0 Flash" 家族
+GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025" 
 API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
 # --- Helper Function: Quarter Comparison ---
@@ -79,7 +81,7 @@ Analyst Question: "Market consensus is shifting from volume growth to free cash 
 Management Introduction: "Azure growth is accelerating, and we are heavily investing in generative AI capabilities. We believe this represents a critical inflection point for enterprise computing."
 Analyst Question: "The LinkedIn business unit has shown slower growth. Is this a structural issue, or are you confident you can improve its monetization in the coming quarters?"
 
---- Earnings Call Excerpt: Microsoft_{end_y}Q{end_q_num}.txt ---
+--- Earnings Call Excerpt: Microsoft_{end_y}Q{end_y_num}.txt ---
 Management Introduction: "Our strategic focus is the commercialization of Co-pilot across the entire M365 suite. We are maintaining strict control over headcount to ensure margin expansion while funding AI R&D."
 Analyst Question: "Given Azure's increasing market dominance, particularly in the European Union, what are the regulatory risks involved?"
 """
@@ -96,10 +98,10 @@ Analyst Question: "Given Azure's increasing market dominance, particularly in th
     }
 
 
-# --- Core Function: Call the Real Gemini API ---
+# --- Core Function: Call the Real Gemini API (Updated for Plain Text) ---
 async def call_gemini_api(api_data: dict) -> str:
     """
-    Calls the Gemini API to fetch structured JSON analysis based on the simulated transcript data.
+    Calls the Gemini API to fetch a plain text analytical paragraph based on the simulated transcript data.
     """
     
     # 1. Prepare the Prompt
@@ -113,14 +115,11 @@ async def call_gemini_api(api_data: dict) -> str:
     )
     
     # The actual query sent to the model, containing the prompt instructions and content to analyze
-    user_query = f"Analyze the following file excerpts and output the JSON result according to the provided instructions:\n\n---\n{api_data.get('full_text', 'No content provided.')}\n---\n"
+    user_query = f"Analyze the following file excerpts and output the result according to the provided instructions:\n\n---\n{api_data.get('full_text', 'No content provided.')}\n---\n"
     
     # 2. Prepare API Request Parameters
-    # FIX: Check for GOOGLE_API_KEY first, then GEMINI_API_KEY as a fallback.
     api_key = os.environ.get('GOOGLE_API_KEY', os.environ.get('GEMINI_API_KEY', ""))
     
-    # DEBUG: Print first 4 characters of the key to console to check if it loaded.
-    # Note: If this prints '...', it means the key is still missing in the environment.
     print(f"DEBUG: API Key Loaded (first 4 chars): {api_key[:4]}...")
 
     api_url = f"{API_URL_BASE}/{GEMINI_MODEL}:generateContent?key={api_key}"
@@ -132,19 +131,14 @@ async def call_gemini_api(api_data: dict) -> str:
                 "parts": [{"text": user_query}]
             }
         ],
-        # --- FIX: Changed "config" to the correct API field "generationConfig" ---
-        "generationConfig": { 
-            # Ensure model returns JSON matching the schema
-            "responseMimeType": "application/json",
-            "responseSchema": ANALYSIS_SCHEMA
-        },
+        # REMOVED: generationConfig for JSON schema
         "systemInstruction": {
             "parts": [{"text": system_instruction}]
         }
     }
     
     # 3. Execute API Call (using httpx for asynchronous operation)
-    async with httpx.AsyncClient(timeout=30.0) as client:
+    async with httpx.AsyncClient(timeout=60.0) as client: 
         for attempt in range(MAX_RETRIES):
             try:
                 # Perform the POST request
@@ -158,29 +152,33 @@ async def call_gemini_api(api_data: dict) -> str:
                 # Check response structure
                 result = response.json()
                 
-                # Extract the JSON string from the response
-                json_string = result['candidates'][0]['content']['parts'][0]['text']
-                
-                # Format the JSON string for pretty display on the page
-                parsed_json = json.loads(json_string)
-                # Use indent=2 for human-readable output
-                return json.dumps(parsed_json, indent=2, ensure_ascii=False)
+                # --- Simplified Text Extraction ---
+                try:
+                    # Extract the raw text string from the response
+                    final_text = result['candidates'][0]['content']['parts'][0]['text']
+                    # Strip any surrounding whitespace or markdown fences, if any
+                    return final_text.strip() 
+                except (KeyError, IndexError) as e:
+                    # If the expected path is missing, print the raw response for debugging
+                    print(f"API Response Structure Error: Missing expected key in response. Raw Response: {json.dumps(result, indent=2)}")
+                    return f"API Structure Error: The model returned an unexpected format. Details: {e}"
+                # --- End Simplified Text Extraction ---
 
             except httpx.HTTPStatusError as e:
                 # Handle rate limiting (429)
                 if e.response.status_code == 429 and attempt < MAX_RETRIES - 1:
                     wait_time = 2 ** attempt
                     print(f"Rate limited (429). Retrying in {wait_time} seconds...")
-                    time.sleep(wait_time) # Use synchronous sleep in this loop context
+                    time.sleep(wait_time) 
                 elif e.response.status_code == 400:
-                    # Capture the full 400 error message for debugging
                     error_message = f"API Error (HTTP 400): {e.response.text}"
                     print(error_message)
                     return error_message
                 else:
                     return f"API Error (HTTP {e.response.status_code}): {e.response.text}"
             except Exception as e:
-                return f"An unexpected error occurred during API call: {e}"
+                print(f"Generic Unexpected Error: {type(e).__name__} - {e}")
+                return f"An unexpected error occurred during API call: {type(e).__name__} - {e}"
 
     return "Error: API call failed after multiple retries."
 

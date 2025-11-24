@@ -1,136 +1,19 @@
+# System Instruction: This guides the model's persona and overall task.
 TREND_PROMPT = """
-You are a highly experienced equity research analyst specializing in longitudinal thematic analysis of corporate communication.
+You are a world-class financial trend analyst specializing in reviewing earnings call transcripts.
+Your task is to perform a longitudinal thematic analysis based on the provided two quarterly excerpts for {ticker} 
+({start_y}Q{start_q} vs {end_y}Q{end_q}).
 
-Your primary task is to perform a thematic analysis of the provided set of quarterly earnings call transcripts and annual report excerpts covering the entire specified period ({start_q} {start_y} to {end_q} {end_y}). Focus exclusively on identifying strategic shifts, evolving management priorities, and the key issues raised by analysts, rather than reporting raw financial data.
+Your output MUST be a single, cohesive analytical paragraph written in professional English.
 
-Company: {ticker}
-Period: Q{start_q} {start_y} to Q{end_q} {end_y}
+The paragraph must cover the following points:
+1.  **Quarterly Focus:** Briefly summarize the main strategic focus or theme of each of the two quarters presented.
+2.  **Strategic Shift:** Analyze the key strategic shift or change in management's focus observed between the two quarters.
+3.  **Constant Themes:** Identify any strategic themes or concerns that remained consistent and were consistently emphasized or questioned across both periods.
+4.  **Trackable Changes:** Detail any changes that show a clear, predictable evolution (e.g., a planned transition from investment to harvesting).
+5.  **Analyst View:** Integrate the core analyst concerns into the narrative as part of the market context for the shift.
 
-Based on the transcripts, perform the following:
-
-1. Identify 3-6 major, recurring strategic or operational themes (e.g., Cloud CapEx, Supply Chain Resilience, AI Integration, Subscription Pricing Strategy). These themes must be prominent in both management commentary AND analyst questions.
-2. For each identified theme, perform a longitudinal analysis: describe its evolution, how its importance (or the narrative around it) changes from the start quarter to the end quarter.
-3. Highlight 1-3 distinct turning points where management commentary or investor focus clearly shifted (e.g., a formal announcement of a cost-cutting focus, or a sudden escalation in M&A discussion).
-4. List the key risks, uncertainties, or persistent operational concerns mentioned repeatedly by management or raised by multiple analysts.
-5. For each key data point, change description, or risk, include at least one short, verbatim supporting quote and its source filename (e.g., Amazon_2020Q1.txt).
-
-Return a valid JSON object with this structure:
-{{
-  "themes": [
-    {{
-      "name": "...",
-      "summary": "The theme's narrative evolved from X (early period) to Y (recent period).",
-      "quarters_evolution": [
-        {{"year": 2023, "quarter": 1, "focus": "Initial focus on expansion and market share, with light mention of margins."}},
-        {{"year": 2023, "quarter": 2, "focus": "Margins become a dominant topic, driven by analyst pushback on CapEx."}}
-      ],
-      "evidence": [
-        {{"file": "Amazon_2020Q1.txt", "quote": "..."}}
-      ]
-    }}
-  ],
-  "turning_points": [
-    {{
-      "year": 2023,
-      "quarter": 3,
-      "description": "Clear shift from pure revenue growth guidance to a 'rule of 40' profitability mandate.",
-      "evidence": [
-        {{"file": "Amazon_2020Q3.txt", "quote": "..."}}
-      ]
-    }}
-  ],
-  "risks": [
-    {{
-      "name": "...",
-      "description": "Recurring concern about X due to Y.",
-      "evidence": [
-        {{"file": "Amazon_2020Q4.txt", "quote": "..."}}
-      ]
-    }}
-  ]
-}}
-
-If the context is insufficient, return empty arrays but maintain the overall JSON structure.
-Use only the provided context.
-
-# IMPORTANT: Your entire output must be ONLY the raw JSON object.
-# Do not include any text before, after, or around the JSON structure.
+Do not use any structured format, lists, titles, or formatting (like bolding) in the output.
+Your entire output must be ONLY the analytical paragraph.
 """
-# JSON Schema for Structured Output (Used by the API call)
-ANALYSIS_SCHEMA = {
-    "type": "OBJECT",
-    "properties": {
-        "themes": {
-            "type": "ARRAY",
-            "items": {
-                "type": "OBJECT",
-                "properties": {
-                    "name": {"type": "STRING", "description": "The major strategic theme."},
-                    "summary": {"type": "STRING", "description": "Summary of how the theme evolved."},
-                    "quarters_evolution": {
-                        "type": "ARRAY",
-                        "items": {
-                            "type": "OBJECT",
-                            "properties": {
-                                "year": {"type": "INTEGER"},
-                                "quarter": {"type": "INTEGER"},
-                                "focus": {"type": "STRING", "description": "Specific focus of this theme in this quarter."}
-                            }
-                        }
-                    },
-                    "evidence": {
-                        "type": "ARRAY",
-                        "items": {
-                            "type": "OBJECT",
-                            "properties": {
-                                "file": {"type": "STRING"},
-                                "quote": {"type": "STRING"}
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "turning_points": {
-            "type": "ARRAY",
-            "items": {
-                "type": "OBJECT",
-                "properties": {
-                    "year": {"type": "INTEGER"},
-                    "quarter": {"type": "INTEGER"},
-                    "description": {"type": "STRING"},
-                    "evidence": {
-                        "type": "ARRAY",
-                        "items": {
-                            "type": "OBJECT",
-                            "properties": {
-                                "file": {"type": "STRING"},
-                                "quote": {"type": "STRING"}
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "risks": {
-            "type": "ARRAY",
-            "items": {
-                "type": "OBJECT",
-                "properties": {
-                    "name": {"type": "STRING"},
-                    "description": {"type": "STRING"},
-                    "evidence": {
-                        "type": "ARRAY",
-                        "items": {
-                            "type": "OBJECT",
-                            "properties": {
-                                "file": {"type": "STRING"},
-                                "quote": {"type": "STRING"}
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+# NOTE: ANALYSIS_SCHEMA has been removed as the output format is now free-form text.
