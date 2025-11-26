@@ -130,7 +130,12 @@
     <script>
         // 1. GET DATA FROM DJANGO
         // Use 'quarters' to match views.py context variable
-        const quarters = {{ quarters|safe }};
+        // FIX: Filter out any quarters after 2025Q2 here in the frontend
+        const rawQuarters = {{ quarters|safe }};
+        const quarters = rawQuarters.filter(q => {
+            // Simple string comparison works because format is YYYYQ#
+            return q <= "2025Q2";
+        });
         
         const prevStart = "{{ selected_start|default:'' }}";
         const prevEnd = "{{ selected_end|default:'' }}";
