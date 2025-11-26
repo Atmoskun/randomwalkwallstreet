@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-gray-50">
+<html lang="en" class="h-full bg-emerald-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quarterly Data Selection</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load noUiSlider CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css">
     <script>
         tailwind.config = {
             theme: {
@@ -17,93 +19,192 @@
             },
         }
     </script>
+    <style>
+        /* Custom styles for the slider to match Tailwind Emerald */
+        .noUi-connect {
+            background: #059669; /* Emerald-600 */
+        }
+        .noUi-horizontal {
+            height: 10px;
+        }
+        .noUi-handle {
+            background: #ffffff;
+            border: 2px solid #059669; /* Emerald-600 */
+            border-radius: 50%;
+            box-shadow: none;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            top: -6px;
+            right: -10px; /* fix center alignment */
+        }
+        .noUi-handle:before, .noUi-handle:after {
+            display: none; /* Remove the default lines on the handle */
+        }
+        .noUi-value {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+        .noUi-marker {
+            background: #d1d5db;
+        }
+    </style>
 </head>
 <body class="h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-2xl w-full space-y-8">
+    <div class="max-w-3xl w-full space-y-8">
         <div>
             <h1 class="text-center text-3xl font-extrabold text-gray-900">
                 Quarterly Data Selection
             </h1>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Select a company and drag the slider to choose your analysis period.
+            </p>
         </div>
         
-        <!-- This is the form that collects the user's choices -->
         <form class="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" 
-              action="." <!-- Submits to the current page/URL -->
-              method="POST">
+              action="." 
+              method="POST"
+              id="analysis-form">
             
-            <!-- This tag is a required Django security feature -->
             {% csrf_token %}
             
-            <div class="rounded-md shadow-sm -space-y-px">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    
-                    <!-- 1. Company Name Dropdown -->
-                    <div>
-                        <label for="company" class="block text-sm font-medium text-gray-700">Company Name</label>
-                        <select id="company" name="company" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                            <!-- Corrected: Changed 'company_options' to 'companies' -->
-                            <option value="" disabled {% if not selected_company %}selected{% endif %}>Select Company...</option>
-                            {% for company in companies %}
-                                <option value="{{ company }}" {% if company == selected_company %}selected{% endif %}>
-                                    {{ company }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
+            <!-- HIDDEN INPUTS: These send the data to Django -->
+            <!-- JavaScript will update these values when the slider moves -->
+            <input type="hidden" name="start_quarter" id="hidden_start_quarter">
+            <input type="hidden" name="end_quarter" id="hidden_end_quarter">
 
-                    <!-- 2. Starting Quarter Dropdown -->
-                    <div>
-                        <label for="start_quarter" class="block text-sm font-medium text-gray-700">Starting Quarter</label>
-                        <select id="start_quarter" name="start_quarter" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                            <!-- Corrected: Changed 'quarter_options' to 'quarters' -->
-                            <option value="" disabled {% if not selected_start %}selected{% endif %}>Select Quarter...</option>
-                            {% for quarter in quarters %}
-                                <option value="{{ quarter }}" {% if quarter == selected_start %}selected{% endif %}>
-                                    {{ quarter }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- 3. Ending Quarter Dropdown -->
-                    <div>
-                        <label for="end_quarter" class="block text-sm font-medium text-gray-700">Ending Quarter</label>
-                        <select id="end_quarter" name="end_quarter" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                            <!-- Corrected: Changed 'quarter_options' to 'quarters' -->
-                            <option value="" disabled {% if not selected_end %}selected{% endif %}>Select Quarter...</option>
-                            {% for quarter in quarters %}
-                                <option value="{{ quarter }}" {% if quarter == selected_end %}selected{% endif %}>
-                                    {{ quarter }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
+            <div class="space-y-8">
+                
+                <!-- 1. Company Name Dropdown (Standard) -->
+                <div>
+                    <label for="company" class="block text-sm font-medium text-gray-700">Company Name</label>
+                    <select id="company" name="company" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm rounded-md border">
+                        <option value="" disabled {% if not selected_company %}selected{% endif %}>Select Company...</option>
+                        {% for company in company_options %}
+                            <option value="{{ company }}" {% if company == selected_company %}selected{% endif %}>
+                                {{ company }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
+
+                <!-- 2. The Range Slider Container -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-4">Select Time Range</label>
+                    <div id="quarter-slider" class="px-2 mb-12"></div> <!-- Slider goes here -->
+                    
+                    <!-- Display selected range text for user clarity -->
+                    <div class="text-center text-sm font-medium text-emerald-800 bg-emerald-50 py-2 rounded-md border border-emerald-100">
+                        Selected Range: <span id="range-text">Loading...</span>
+                    </div>
+                </div>
+
             </div>
 
             <div>
-                <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Submit
+                <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors">
+                    Run Analysis
                 </button>
             </div>
         </form>
 
-        <!-- This is the "Output Data" section -->
-        <!-- Updated to display the free-form analytical paragraph -->
+        <!-- Output Data Section -->
         {% if analysis_result %}
-            <div class="bg-white p-8 rounded-lg shadow-md">
-                <h2 class="text-2xl font-bold text-gray-900 mb-4">
-                    Longitudinal Strategic Analysis
+            <div class="bg-white p-8 rounded-lg shadow-md border-t-4 border-emerald-500">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Analysis Results
                 </h2>
-                <!-- Changed from <pre> to <div> for better paragraph rendering -->
-                <!-- The analysis result is now a plain text paragraph -->
-                <div class="bg-gray-50 p-4 rounded-md text-base text-gray-700 leading-relaxed">
-                    {{ analysis_result|safe }}
-                </div>
+                <div class="bg-gray-50 p-6 rounded-md text-sm text-gray-700 leading-relaxed whitespace-pre-wrap font-mono border border-gray-200 shadow-inner overflow-x-auto">{{ analysis_result|safe }}</div>
             </div>
         {% endif %}
 
     </div>
+
+    <!-- Load noUiSlider JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+    
+    <script>
+        // 1. GET DATA FROM DJANGO
+        // We use the 'quarter_options' list passed from views.py
+        // The '|safe' filter ensures quotes aren't escaped incorrectly
+        const quarters = {{ quarter_options|safe }};
+        
+        // Previous selections (if any) to restore state after reload
+        const prevStart = "{{ selected_start|default:'' }}";
+        const prevEnd = "{{ selected_end|default:'' }}";
+
+        // 2. SETUP THE SLIDER
+        const slider = document.getElementById('quarter-slider');
+        
+        // Determine start/end indices. Default to first and last if no selection.
+        let startIndex = 0;
+        let endIndex = quarters.length - 1;
+
+        if (prevStart && quarters.includes(prevStart)) {
+            startIndex = quarters.indexOf(prevStart);
+        }
+        if (prevEnd && quarters.includes(prevEnd)) {
+            endIndex = quarters.indexOf(prevEnd);
+        }
+
+        noUiSlider.create(slider, {
+            start: [startIndex, endIndex], // Initial handle positions (indices)
+            connect: true, // Display a colored bar between handles
+            step: 1, // Snap to each quarter (no decimals)
+            // ADDED: Margin ensures handles cannot cross each other
+            margin: 0, 
+            // ADDED: Behavior allows dragging the connection bar to move both handles
+            behaviour: 'tap-drag', 
+            range: {
+                'min': 0,
+                'max': quarters.length - 1
+            },
+            // Pips (the markers below the slider)
+            pips: {
+                mode: 'steps',
+                density: 10, // Adjusts how many ticks appear
+                filter: function (value, type) {
+                    // Show label for every 4th quarter (Q1s) to avoid crowding
+                    return value % 4 === 0 ? 1 : 0; 
+                },
+                format: {
+                    to: function (value) {
+                        return quarters[Math.round(value)];
+                    }
+                }
+            },
+            tooltips: {
+                to: function(value) {
+                    return quarters[Math.round(value)];
+                }
+            }
+        });
+
+        // 3. LINK SLIDER TO FORM
+        const textDisplay = document.getElementById('range-text');
+        const hiddenStart = document.getElementById('hidden_start_quarter');
+        const hiddenEnd = document.getElementById('hidden_end_quarter');
+
+        // Update hidden inputs whenever slider moves
+        slider.noUiSlider.on('update', function (values, handle) {
+            // values[0] is ALWAYS the left handle (Start)
+            // values[1] is ALWAYS the right handle (End)
+            // Because we set margin: 0, they can touch but never cross.
+            const startIdx = Math.round(values[0]);
+            const endIdx = Math.round(values[1]);
+            
+            const startQ = quarters[startIdx];
+            const endQ = quarters[endIdx];
+
+            // Update the text user sees
+            textDisplay.textContent = `${startQ} — ${endQ}`;
+
+            // Update the hidden inputs that Django will read
+            hiddenStart.value = startQ;
+            hiddenEnd.value = endQ;
+        });
+    </script>
 </body>
 </html>
