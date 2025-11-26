@@ -70,32 +70,33 @@
             {% csrf_token %}
             
             <!-- HIDDEN INPUTS: These send the data to Django -->
-            <!-- JavaScript will update these values when the slider moves -->
             <input type="hidden" name="start_quarter" id="hidden_start_quarter">
             <input type="hidden" name="end_quarter" id="hidden_end_quarter">
 
             <div class="space-y-8">
                 
-                <!-- 1. Company Name Dropdown (Standard) -->
+                <!-- 1. Company Name Dropdown -->
                 <div>
                     <label for="company" class="block text-sm font-medium text-gray-700">Company Name</label>
-                    <select id="company" name="company" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm rounded-md border">
+                    <!-- Added text-gray-900 and bg-white to ensure visibility -->
+                    <select id="company" name="company" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base text-gray-900 bg-white border-gray-300 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm rounded-md border">
                         <option value="" disabled {% if not selected_company %}selected{% endif %}>Select Company...</option>
-                        <!-- FIX: Use 'company_options' to match views.py context variable -->
-                        {% for company in company_options %}
+                        
+                        <!-- FIX: Changed 'company_options' to 'companies' to match views.py context -->
+                        {% for company in companies %}
                             <option value="{{ company }}" {% if company == selected_company %}selected{% endif %}>
                                 {{ company }}
                             </option>
                         {% endfor %}
+                        
                     </select>
                 </div>
 
                 <!-- 2. The Range Slider Container -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-4">Select Time Range</label>
-                    <div id="quarter-slider" class="px-2 mb-12"></div> <!-- Slider goes here -->
+                    <div id="quarter-slider" class="px-2 mb-12"></div> 
                     
-                    <!-- Display selected range text for user clarity -->
                     <div class="text-center text-sm font-medium text-emerald-800 bg-emerald-50 py-2 rounded-md border border-emerald-100">
                         Selected Range: <span id="range-text">Loading...</span>
                     </div>
@@ -128,18 +129,15 @@
     
     <script>
         // 1. GET DATA FROM DJANGO
-        // We use the 'quarter_options' list passed from views.py
-        // The '|safe' filter ensures quotes aren't escaped incorrectly
-        const quarters = {{ quarter_options|safe }};
+        // Use 'quarters' to match views.py context variable
+        const quarters = {{ quarters|safe }};
         
-        // Previous selections (if any) to restore state after reload
         const prevStart = "{{ selected_start|default:'' }}";
         const prevEnd = "{{ selected_end|default:'' }}";
 
         // 2. SETUP THE SLIDER
         const slider = document.getElementById('quarter-slider');
         
-        // Determine start/end indices. Default to first and last if no selection.
         let startIndex = 0;
         let endIndex = quarters.length - 1;
 
@@ -151,23 +149,20 @@
         }
 
         noUiSlider.create(slider, {
-            start: [startIndex, endIndex], // Initial handle positions (indices)
-            connect: true, // Display a colored bar between handles
-            step: 1, // Snap to each quarter (no decimals)
-            // ADDED: Margin ensures handles cannot cross each other
+            start: [startIndex, endIndex],
+            connect: true,
+            step: 1,
             margin: 0, 
-            // ADDED: Behavior allows dragging the connection bar to move both handles
             behaviour: 'tap-drag', 
             range: {
                 'min': 0,
                 'max': quarters.length - 1
             },
-            // Pips (the markers below the slider)
             pips: {
                 mode: 'steps',
-                density: 10, // Adjusts how many ticks appear
+                density: 10,
                 filter: function (value, type) {
-                    // Show label for every 4th quarter (Q1s) to avoid crowding
+                    // Show label for every 4th quarter (Q1s)
                     return value % 4 === 0 ? 1 : 0; 
                 },
                 format: {
@@ -188,21 +183,15 @@
         const hiddenStart = document.getElementById('hidden_start_quarter');
         const hiddenEnd = document.getElementById('hidden_end_quarter');
 
-        // Update hidden inputs whenever slider moves
         slider.noUiSlider.on('update', function (values, handle) {
-            // values[0] is ALWAYS the left handle (Start)
-            // values[1] is ALWAYS the right handle (End)
-            // Because we set margin: 0, they can touch but never cross.
             const startIdx = Math.round(values[0]);
             const endIdx = Math.round(values[1]);
             
             const startQ = quarters[startIdx];
             const endQ = quarters[endIdx];
 
-            // Update the text user sees
             textDisplay.textContent = `${startQ} — ${endQ}`;
 
-            // Update the hidden inputs that Django will read
             hiddenStart.value = startQ;
             hiddenEnd.value = endQ;
         });
