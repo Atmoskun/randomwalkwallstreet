@@ -81,7 +81,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Your project apps
     'mailinglist', 
-    'api',         
+    'api',  
+    'tracking',       
 ]
 
 MIDDLEWARE = [
