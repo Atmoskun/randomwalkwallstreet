@@ -28,6 +28,7 @@ urlpatterns = [
     # Your webpage will be at: /analysis/
     # Your health API will be at: /analysis/api/health
     path('analysis/', include('api.urls')),
+    path('tracking/api/update-time/', update_visit_time, name='update_time'),
 ]
 
 

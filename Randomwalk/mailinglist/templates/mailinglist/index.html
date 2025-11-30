@@ -10,6 +10,26 @@
         }
     </style>
 </head>
+<script>
+    let startTime = Date.now();
+
+    // 当用户尝试离开页面 (关闭标签、刷新、点击链接) 时触发
+    window.addEventListener('beforeunload', function () {
+        let endTime = Date.now();
+        // 计算停留秒数
+        let timeSpent = (endTime - startTime) / 1000; 
+
+        // 准备数据
+        let data = JSON.stringify({
+            path: window.location.pathname,
+            duration: timeSpent
+        });
+
+        // 使用 navigator.sendBeacon 发送数据
+        // sendBeacon 是专门为此设计的，它保证在页面关闭后请求依然能发送成功
+        navigator.sendBeacon('/tracking/api/update-time/', data);
+    });
+</script>
 <body>
     <h2>Input your information</h2>
 
