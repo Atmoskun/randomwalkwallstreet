@@ -18,5 +18,5 @@ class Command(BaseCommand):
         total_visits = PageView.objects.aggregate(total_visits=Sum('visits'))['total_visits']
         self.stdout.write(f"Total Page Visits: {total_visits}")
 
-        avg_time = SiteVisit.objects.aggregate(avg_time=Avg('time_spent_seconds'))['avg_time']
+        avg_time = SiteVisit.objects.aggregate(avg_time=Avg('time_spent_seconds'))['avg_time'] or 0
         self.stdout.write(f"Average Time Spent per Visit: {avg_time:.2f} seconds")
