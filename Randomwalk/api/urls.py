@@ -6,5 +6,6 @@ urlpatterns = [
     path('', views.quarterly_selection_view, name='quarterly_selection'),
 
     # Analytics / Tracking endpoint
+    # This path maps to the update_visit_time function in api/views.py
     path('tracking/api/update-time/', views.update_visit_time, name='update_time'),
 ]
