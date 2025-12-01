@@ -76,12 +76,13 @@ Analyst Question: "Market consensus is shifting from volume growth to free cash 
     elif company == 'Microsoft':
         ticker = "MSFT"
         # Simulate Microsoft transcript excerpts
+        # FIX: Changed {end_y_num} to {end_q_num} below
         data = f"""
 --- Earnings Call Excerpt: Microsoft_{start_y}Q{start_q_num}.txt ---
 Management Introduction: "Azure growth is accelerating, and we are heavily investing in generative AI capabilities. We believe this represents a critical inflection point for enterprise computing."
 Analyst Question: "The LinkedIn business unit has shown slower growth. Is this a structural issue, or are you confident you can improve its monetization in the coming quarters?"
 
---- Earnings Call Excerpt: Microsoft_{end_y}Q{end_y_num}.txt ---
+--- Earnings Call Excerpt: Microsoft_{end_y}Q{end_q_num}.txt ---
 Management Introduction: "Our strategic focus is the commercialization of Co-pilot across the entire M365 suite. We are maintaining strict control over headcount to ensure margin expansion while funding AI R&D."
 Analyst Question: "Given Azure's increasing market dominance, particularly in the European Union, what are the regulatory risks involved?"
 """
