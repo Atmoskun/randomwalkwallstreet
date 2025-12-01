@@ -27,8 +27,6 @@ urlpatterns = [
     # 2. Your app is added under the 'analysis/' path
     # Your webpage will be at: /analysis/
     # Your health API will be at: /analysis/api/health
+    # The tracking API is now handled inside api.urls
     path('analysis/', include('api.urls')),
-    path('tracking/api/update-time/', update_visit_time, name='update_time'),
 ]
-
-
