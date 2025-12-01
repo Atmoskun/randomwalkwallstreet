@@ -242,11 +242,10 @@ async def quarterly_selection_view(request: HttpRequest):
     return render(request, 'api/index.html', context)
 
 # --- Analytics / Tracking View ---
-# This is the function that was missing and causing the deployment error
+# This was missing and caused the deployment error
 @csrf_exempt
 def update_visit_time(request: HttpRequest):
     """
     Simple API endpoint to update/log visit time.
-    Currently a placeholder to satisfy the URL configuration.
     """
     return JsonResponse({'status': 'success', 'message': 'Visit time updated'})
