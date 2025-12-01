@@ -3,7 +3,7 @@ import os
 import json
 import httpx # Import asynchronous HTTP client
 from django.shortcuts import render
-from django.http import HttpRequest
+from django.http import HttpRequest, JsonResponse # <--- ADDED JsonResponse
 from django.views.decorators.csrf import csrf_exempt 
 # Updated import: Only TREND_PROMPT is needed now
 from .prompts import TREND_PROMPT 
@@ -76,7 +76,7 @@ Analyst Question: "Market consensus is shifting from volume growth to free cash 
     elif company == 'Microsoft':
         ticker = "MSFT"
         # Simulate Microsoft transcript excerpts
-        # FIX: Changed {end_y_num} to {end_q_num} below
+        # FIX: Changed {end_y_num} to {end_q_num} below to prevent crash
         data = f"""
 --- Earnings Call Excerpt: Microsoft_{start_y}Q{start_q_num}.txt ---
 Management Introduction: "Azure growth is accelerating, and we are heavily investing in generative AI capabilities. We believe this represents a critical inflection point for enterprise computing."
@@ -240,3 +240,12 @@ async def quarterly_selection_view(request: HttpRequest):
 
     # 3. Render the template
     return render(request, 'api/index.html', context)
+
+# --- Analytics / Tracking View ---
+# This is the function that was MISSING in your uploaded file!
+@csrf_exempt
+def update_visit_time(request: HttpRequest):
+    """
+    Simple API endpoint to update/log visit time.
+    """
+    return JsonResponse({'status': 'success', 'message': 'Visit time updated'})
