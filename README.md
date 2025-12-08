@@ -2,7 +2,7 @@
 How Wall Street Analysts Shift Their Focus Across Multiple Earnings Seasons
 
 # Overview
-By leveraging large language models (LLMs) to process earnings call transcripts, the project aims to analyze how Wall Street analysts shift their focus of questions across multiple earnings seasons.
+By leveraging large language models (LLMs) to process earnings call transcripts, the project aims to analyze how Wall Street analysts shift their focus of questions across multiple earnings seasons. It is a web application designed to help financial analysts and investors quickly understand shifting management priorities and analyst concerns over time. Instead of manually reading dozens of transcripts, users can select a company and a specific time range (e.g., Q1 2022 – Q4 2023) to receive an automated, evidence-backed analysis.
 
 # User Journey 
 0 Registration & Authentication
@@ -20,6 +20,19 @@ On the backend, the system retrieves the relevant earnings call transcripts and 
 3 Analyst Attention Mapping
 Using customized prompt engineering, the LLM identifies shifts in analyst attention by analyzing the analysts' questions asked during each earnings call. The model then summarizes changes in analysts' focus.
 (Core feature: LLM prompt engineering.)
+Here is a comprehensive and updated README.md for your project. This version reflects the actual features you built (Authentication, LLM Analysis with Gemini, A/B Testing) and the technical stack you used (Django, Render, PostgreSQL), referencing the specific details from your sprint documents and code.
+
+# Key Features
+
+1 Authentication & User Profiles: Secure signup and login system integrated with a production PostgreSQL database.
+
+2 Quarterly Trend Analysis: Users can select a specific ticker (e.g., Amazon, Microsoft) and a custom quarter range. The system retrieves the relevant proprietary transcripts and generates a synthesized report.
+
+3 LLM-Powered Insights: Uses prompt engineering to extract "Top Themes," "Turning Points," and "Analyst Concerns" from raw text.
+
+4 A/B Testing Framework: Includes a dedicated testing endpoint to measure user engagement with different UI variants ("Kudos" vs. "Thanks"), tracked via Google Analytics.
+
+5 Production-Ready Deployment: Hosted on Render with distinct staging and production environments, ensuring stability and CI/CD best practices .
 
 # Core Databases
 1 User Database
@@ -30,6 +43,18 @@ Contains historical earnings call transcripts for Microsoft and Amazon from Q1 2
 
 3 Prompt Engineering Repository
 Stores and version-controls optimized prompts used for transcript interpretation. A sample prompt would be: You are the best investor in the market. Based on the following earnings call transcripts from [21Q4] to [23Q3] of [Microsoft], how has the focus of analysts shifted during that period? 
+
+# Technical Stack
+Backend: Django (Python) 
+Database: PostgreSQL (Production), SQLite (Local) 
+AI/LLM: Google Gemini API (gemini-2.5-flash-preview-09-2025)
+Hosting: Render 
+Analytics: Google Analytics 4 (GA4)
+
+# Project Structure
+The repository is organized into two main Django apps:
+mailinglist: Handles user authentication, landing pages, and session management.
+api: Contains the core logic for transcript retrieval, prompt engineering, and the Gemini API integration.
 
 # Usage Sample
 A user wants to know how analysts' focus has changed from 21Q4 to 23Q3 for Microsoft. He logs into the system and specifies the company and earnings call period. The system outputs...
