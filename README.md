@@ -45,15 +45,21 @@ Contains historical earnings call transcripts for Microsoft and Amazon from Q1 2
 Stores and version-controls optimized prompts used for transcript interpretation. A sample prompt would be: You are the best investor in the market. Based on the following earnings call transcripts from [21Q4] to [23Q3] of [Microsoft], how has the focus of analysts shifted during that period? 
 
 # Technical Stack
-Backend: Django (Python) 
-Database: PostgreSQL (Production), SQLite (Local) 
-AI/LLM: Google Gemini API (gemini-2.5-flash-preview-09-2025)
-Hosting: Render 
+Backend: Django (Python)
+
+Database: PostgreSQL (Production), SQLite (Local)
+
+AI/LLM: Google Gemini API
+
+Hosting: Render
+
 Analytics: Google Analytics 4 (GA4)
 
 # Project Structure
 The repository is organized into two main Django apps:
+
 mailinglist: Handles user authentication, landing pages, and session management.
+
 api: Contains the core logic for transcript retrieval, prompt engineering, and the Gemini API integration.
 
 # Usage Sample
