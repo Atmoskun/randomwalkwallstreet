@@ -34,16 +34,6 @@ Here is a comprehensive and updated README.md for your project. This version ref
 
 5 Production-Ready Deployment: Hosted on Render with distinct staging and production environments, ensuring stability and CI/CD best practices .
 
-# Core Databases
-1 User Database
-Stores user registration credentials.
-
-2 Earnings Transcript Database
-Contains historical earnings call transcripts for Microsoft and Amazon from Q1 2020 through Q2 2025, referred by company and reporting period.
-
-3 Prompt Engineering Repository
-Stores and version-controls optimized prompts used for transcript interpretation. A sample prompt would be: You are the best investor in the market. Based on the following earnings call transcripts from [21Q4] to [23Q3] of [Microsoft], how has the focus of analysts shifted during that period? 
-
 # Technical Stack
 Backend: Django (Python)
 
@@ -61,6 +51,29 @@ The repository is organized into two main Django apps:
 mailinglist: Handles user authentication, landing pages, and session management.
 
 api: Contains the core logic for transcript retrieval, prompt engineering, and the Gemini API integration.
+
+# A/B Testing Experiment
+As part of our data-driven development process, we implemented a live A/B test at the /9ad7709 endpoint.
+
+Goal: Test user preference for button micro-copy ("Kudos" vs. "Thanks").
+
+Implementation: Server-side randomization using Django views and Google Analytics custom events.
+
+# Deployment Information
+https://randomwalkwallstreet.onrender.com/
+
+# Team member contributions
+Please refer to the planning docs in the docs/sprints folder
+
+# Core Databases
+1 User Database
+Stores user registration credentials.
+
+2 Earnings Transcript Database
+Contains historical earnings call transcripts for Microsoft and Amazon from Q1 2020 through Q2 2025, referred by company and reporting period.
+
+3 Prompt Engineering Repository
+Stores and version-controls optimized prompts used for transcript interpretation. A sample prompt would be: You are the best investor in the market. Based on the following earnings call transcripts from [21Q4] to [23Q3] of [Microsoft], how has the focus of analysts shifted during that period? 
 
 # Usage Sample
 A user wants to know how analysts' focus has changed from 21Q4 to 23Q3 for Microsoft. He logs into the system and specifies the company and earnings call period. The system outputs...
