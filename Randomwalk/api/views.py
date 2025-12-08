@@ -289,7 +289,7 @@ def ab_test_view(request: HttpRequest):
         <h3>Team Members:</h3>
         <ul>
             <li>bald-chicken</li>
-            <li>curious-goose</li>
+            <li>keyboard-munger</li>
             <li>enthusiastic-sheep</li>
         </ul>
         <br><br>
