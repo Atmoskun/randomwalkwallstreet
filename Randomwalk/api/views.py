@@ -2,8 +2,9 @@ import time
 import os
 import json
 import httpx # Import asynchronous HTTP client
+import random # <--- ADDED for A/B testing
 from django.shortcuts import render
-from django.http import HttpRequest, JsonResponse # <--- ADDED JsonResponse
+from django.http import HttpRequest, JsonResponse, HttpResponse # <--- ADDED HttpResponse
 from django.views.decorators.csrf import csrf_exempt 
 # Updated import: Only TREND_PROMPT is needed now
 from .prompts import TREND_PROMPT 
@@ -249,3 +250,51 @@ def update_visit_time(request: HttpRequest):
     Simple API endpoint to update/log visit time.
     """
     return JsonResponse({'status': 'success', 'message': 'Visit time updated'})
+
+# --- CRITICAL: A/B Testing Endpoint ---
+# Hash: 9ad7709
+@csrf_exempt
+def ab_test_view(request: HttpRequest):
+    """
+    Standardized Analytics Endpoint for A/B Testing.
+    Endpoint: /9ad7709
+    """
+    # 1. Variants
+    variants = ["kudos", "thanks"]
+    
+    # 2. Random selection
+    # We use simple random choice here as requested.
+    selected_variant = random.choice(variants)
+    
+    # 3. Analytics Tracking (Simple Server-Side Logging)
+    # This prints to your Render logs so you can count them later.
+    print(f"A/B TEST TRACKING: Visitor at /9ad7709 saw variant: {selected_variant}")
+    
+    # 4. Render HTML
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>A/B Test - patient-sky</title>
+        <style>
+            body {{ font-family: sans-serif; text-align: center; padding-top: 50px; }}
+            button {{ padding: 15px 30px; font-size: 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }}
+            button:hover {{ background: #0056b3; }}
+            ul {{ list-style: none; padding: 0; }}
+            li {{ font-size: 18px; margin: 10px 0; }}
+        </style>
+    </head>
+    <body>
+        <h1>Team: patient-sky</h1>
+        <h3>Team Members:</h3>
+        <ul>
+            <li>bald-chicken</li>
+            <li>curious-goose</li>
+            <li>enthusiastic-sheep</li>
+        </ul>
+        <br><br>
+        <button id="abtest">{selected_variant}</button>
+    </body>
+    </html>
+    """
+    return HttpResponse(html_content)
