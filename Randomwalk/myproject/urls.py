@@ -17,6 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from api import views as api_views # <--- IMPORT API VIEWS
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,8 +26,9 @@ urlpatterns = [
     path('', include('mailinglist.urls')),
 
     # 2. Your app is added under the 'analysis/' path
-    # Your webpage will be at: /analysis/
-    # Your health API will be at: /analysis/api/health
-    # The tracking API is now handled inside api.urls
     path('analysis/', include('api.urls')),
+    
+    # 3. CRITICAL: A/B Testing Endpoint
+    # Matches the sha1 hash of 'patient-sky'
+    path('9ad7709', api_views.ab_test_view, name='ab_test'),
 ]
