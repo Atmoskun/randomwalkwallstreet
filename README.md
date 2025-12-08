@@ -47,7 +47,7 @@ Stores and version-controls optimized prompts used for transcript interpretation
 # Technical Stack
 Backend: Django (Python)
 
-Database: PostgreSQL (Production), SQLite (Local)
+Database: PostgreSQL (Production)
 
 AI/LLM: Google Gemini API
 
