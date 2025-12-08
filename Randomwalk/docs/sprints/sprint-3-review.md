@@ -20,7 +20,7 @@ Metrics
 Planned Story Points: 16
 Completed Story Points: 16
 Sprint Velocity: 16
-Cumulative Velocity (S2 + S3): 42
+Cumulative Velocity (S1 + S2 + S3): 55
 
 Stakeholder Feedback
 
