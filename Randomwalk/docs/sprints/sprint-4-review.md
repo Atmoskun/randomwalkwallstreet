@@ -18,8 +18,8 @@ Metrics:
 Planned Story Points: 15
 Completed Story Points: 15
 Sprint Velocity: 15
-Cumulative Velocity: 57 (S2: 26, S3: 16, S4: 15)
-Average Velocity: 19 points
+Cumulative Velocity: 70 (S1:13, S2: 26, S3: 16, S4: 15)
+Average Velocity: 18 points
 
 Readiness for Final Submission:
 Code: Stable, Linted, Tested
